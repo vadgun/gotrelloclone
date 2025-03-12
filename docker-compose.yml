@@ -1,0 +1,75 @@
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+    networks:
+      - kafka-net
+      
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports:
+      - "9092:9092"
+    networks:
+      - kafka-net
+
+  board-service:
+    build: ./board-service
+    ports:
+      - "8081:8080"
+    env_file:
+      - ./board-service/.env
+    depends_on:
+      - mongo
+
+  task-service:
+    build: ./task-service
+    ports:
+      - "8082:8080"
+    env_file:
+      - ./task-service/.env
+    depends_on:
+      - mongo
+
+  user-service:
+    build: ./user-service
+    ports:
+      - "8080:8080"
+    env_file:
+      - ./user-service/.env
+    depends_on:
+      - mongo
+
+  notification-service:
+    build: ./notification-service
+    env_file:
+      - ./notification-service/.env
+    ports:
+      - "8083:8080"
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    command: mongod --quiet --logpath /dev/null
+
+volumes:
+  mongo_data:
+
+networks:
+  kafka-net:
+    driver: bridge

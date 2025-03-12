@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notificaciones en Tiempo Real</title>
+</head>
+<body>
+    <h1>Notificaciones en Tiempo Real</h1>
+    <ul id="messages"></ul>
+
+    <script>
+        const socket = new WebSocket("ws://localhost:8083/ws");
+
+        socket.onmessage = function(event) {
+            console.log("Recibiendo mensaje");
+            const messages = document.getElementById("messages");
+            const message = document.createElement("li");
+            message.textContent = event.data;
+            messages.appendChild(message);
+        };
+
+        socket.onopen = function() {
+            console.log("Conectado a WebSocket");
+        };
+
+        socket.onerror = function(error) {
+            console.log("Error en WebSocket:", error);
+        };
+
+        socket.onclose = function() {
+            console.log("WebSocket cerrado");
+        };
+    </script>
+</body>
+</html>
