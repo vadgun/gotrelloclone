@@ -3,10 +3,10 @@ module github.com/vadgun/gotrelloclone
 go 1.23.2
 
 require (
+	github.com/confluentinc/confluent-kafka-go/v2 v2.8.0
 	github.com/gin-gonic/gin v1.10.0
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/gorilla/websocket v1.5.3
-	github.com/segmentio/kafka-go v0.4.47
 	go.mongodb.org/mongo-driver v1.17.3
 	golang.org/x/crypto v0.36.0
 )
@@ -33,7 +33,6 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/montanaflynn/stats v0.7.1 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.2 // indirect
-	github.com/pierrec/lz4/v4 v4.1.15 // indirect
 	github.com/rogpeppe/go-internal v1.8.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.12 // indirect
