@@ -1,10 +1,12 @@
 package handlers
 
 import (
+	"encoding/json"
 	"net/http"
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/vadgun/gotrelloclone/task-service/kafka"
 	"github.com/vadgun/gotrelloclone/task-service/models"
 	"github.com/vadgun/gotrelloclone/task-service/services"
 	"go.mongodb.org/mongo-driver/bson"
@@ -49,15 +51,15 @@ func (h *TaskHandler) CreateTask(ctx *gin.Context) {
 		return
 	}
 
-	// taskJSON, _ := json.Marshal(task)
-	// Publicar evento en Kafka
-	// err = kafka.ProduceMessage("task-events", "new-task", string(taskJSON))
-	// if err != nil {
-	// 	ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error enviando evento a Kafka"})
-	// 	return
-	// }
+	// Convertir la tarea a JSON
+	taskJSON, _ := json.Marshal(task)
 
-	// err = h.service.
+	// Publicar evento en Kafka
+	err = kafka.ProduceMessage("task-events", "new-task", string(taskJSON))
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error enviando evento a Kafka"})
+		return
+	}
 
 	task.ID = id.(primitive.ObjectID)
 

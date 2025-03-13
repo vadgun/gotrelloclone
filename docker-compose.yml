@@ -28,6 +28,8 @@ services:
       - "8081:8080"
     env_file:
       - ./board-service/.env
+    networks:
+      - kafka-net
     depends_on:
       - mongo
 
@@ -39,6 +41,8 @@ services:
       - ./task-service/.env
     depends_on:
       - mongo
+    networks:
+      - kafka-net
 
   user-service:
     build: ./user-service
@@ -46,6 +50,8 @@ services:
       - "8080:8080"
     env_file:
       - ./user-service/.env
+    networks:
+      - kafka-net
     depends_on:
       - mongo
 
@@ -55,6 +61,8 @@ services:
       - ./notification-service/.env
     ports:
       - "8083:8080"
+    networks:
+      - kafka-net
     depends_on:
       - mongo
 
@@ -65,6 +73,8 @@ services:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
+    networks:
+      - kafka-net
     command: mongod --quiet --logpath /dev/null
 
 volumes:
