@@ -16,11 +16,19 @@ services:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     ports:
       - "9092:9092"
     networks:
       - kafka-net
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics --bootstrap-server localhost:9092 --list"]
+      interval: 5s
+      timeout: 5s
+      retries: 2
+      
 
   board-service:
     build: ./board-service
@@ -64,7 +72,10 @@ services:
     networks:
       - kafka-net
     depends_on:
-      - mongo
+      mongo:
+        condition: service_started
+      kafka: 
+        condition: service_healthy
 
   mongo:
     image: mongo

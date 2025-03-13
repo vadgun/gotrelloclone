@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/vadgun/gotrelloclone/notification-service/config"
 	"github.com/vadgun/gotrelloclone/notification-service/handlers"
+	"github.com/vadgun/gotrelloclone/notification-service/kafka"
 	"github.com/vadgun/gotrelloclone/notification-service/repositories"
 	"github.com/vadgun/gotrelloclone/notification-service/routes"
 	"github.com/vadgun/gotrelloclone/notification-service/services"
@@ -26,5 +27,7 @@ func main() {
 	routes.SetupNotificationRoutes(router, notificationHandler)
 
 	log.Println("🚀 notification-service corriendo en http://notification-service:8080")
+	go kafka.StartConsumer()
 	router.Run(":8080")
+	select {}
 }
