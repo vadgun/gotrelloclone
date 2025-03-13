@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/vadgun/gotrelloclone/task-service/config"
 	"github.com/vadgun/gotrelloclone/task-service/handlers"
-	"github.com/vadgun/gotrelloclone/task-service/kafka"
 	"github.com/vadgun/gotrelloclone/task-service/repositories"
 	"github.com/vadgun/gotrelloclone/task-service/routes"
 	"github.com/vadgun/gotrelloclone/task-service/services"
@@ -18,8 +17,7 @@ func main() {
 
 	// Inicializar repositorio y servicio
 	taskRepo := repositories.NewTaskRepository()
-	kafkaProducer := kafka.NewTaskProducer([]string{"kafka:9092"})
-	taskService := services.NewTaskService(taskRepo, kafkaProducer)
+	taskService := services.NewTaskService(taskRepo)
 	taskHandler := handlers.NewTaskHandler(taskService)
 
 	// Configurar el servicio en modo producción

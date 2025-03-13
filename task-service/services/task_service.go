@@ -9,7 +9,6 @@ import (
 	"net/http"
 
 	"github.com/gorilla/websocket"
-	"github.com/vadgun/gotrelloclone/task-service/kafka"
 	"github.com/vadgun/gotrelloclone/task-service/models"
 	"github.com/vadgun/gotrelloclone/task-service/repositories"
 
@@ -17,17 +16,14 @@ import (
 )
 
 type TaskService struct {
-	repo          *repositories.TaskRepository
-	kafkaProducer *kafka.TaskProducer
+	repo *repositories.TaskRepository
 }
 
-func NewTaskService(repo *repositories.TaskRepository, kafkaProducer *kafka.TaskProducer) *TaskService {
-	return &TaskService{repo: repo, kafkaProducer: kafkaProducer}
+func NewTaskService(repo *repositories.TaskRepository) *TaskService {
+	return &TaskService{repo: repo}
 }
 
 func (s *TaskService) CreateTask(ctx context.Context, task *models.Task, userID string) (interface{}, error) {
-	eventMessage := []byte("Tarea creada: " + task.ID.Hex())
-	s.kafkaProducer.PublishTaskEvent("task-created", eventMessage)
 	return s.repo.CreateTask(ctx, task, userID)
 }
 
