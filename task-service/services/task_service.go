@@ -102,6 +102,7 @@ func (s *TaskService) UserExists(ctx context.Context, userID, token string) (boo
 }
 
 func (s *TaskService) UpdateTaskStatus(ctx context.Context, taskID string, status models.TaskStatus) error {
+	// Implementar Kafka
 	task, _ := s.repo.GetTaskByID(ctx, taskID)
 	s.SendNotification(task.AssigneeID, fmt.Sprintf("El estado de tu tarea '%s' ha cambiado a '%s'", task.Title, status))
 	return s.repo.UpdateTaskStatus(ctx, taskID, status)
