@@ -1,8 +1,10 @@
 package services
 
 import (
+	"encoding/json"
 	"time"
 
+	"github.com/vadgun/gotrelloclone/board-service/kafka"
 	"github.com/vadgun/gotrelloclone/board-service/models"
 	"github.com/vadgun/gotrelloclone/board-service/repositories"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -29,6 +31,15 @@ func (s *BoardService) CreateBoard(name, ownerID string) (*models.Board, error) 
 	}
 
 	board.ID = id.(primitive.ObjectID)
+
+	var kafkaBoard struct {
+		ID string `json:"id" bson:"_id"`
+	}
+
+	kafkaBoard.ID = board.ID.Hex()
+
+	jsonID, _ := json.Marshal(kafkaBoard)
+	go kafka.ProduceMessage("", string(jsonID), "board-events", "new-board")
 
 	return board, nil
 }

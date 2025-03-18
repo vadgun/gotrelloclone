@@ -40,6 +40,8 @@ services:
     depends_on:
       mongo-board:
         condition: service_started
+      task-service:
+        condition: service_started
       kafka: 
         condition: service_healthy
 

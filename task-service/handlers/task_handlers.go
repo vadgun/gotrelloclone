@@ -3,7 +3,6 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/vadgun/gotrelloclone/task-service/models"
@@ -30,11 +29,8 @@ func (h *TaskHandler) CreateTask(ctx *gin.Context) {
 
 	userID, _ := ctx.Get("userID") // Obtenemos el ID del usuario autenticado
 
-	authHeader := ctx.GetHeader("Authorization")
-	tokenString := strings.Split(authHeader, " ")
-
 	// 📌 Validar si el BoardID existe antes de crear la tarea
-	boardExists, err := h.service.BoardExists(ctx, task.BoardID, tokenString[1])
+	boardExists, err := h.service.BoardExists(ctx, task.BoardID)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error al validar el BoardID"})
 		return
@@ -152,11 +148,8 @@ func (h *TaskHandler) MoveTask(ctx *gin.Context) {
 		return
 	}
 
-	authHeader := ctx.GetHeader("Authorization")
-	tokenString := strings.Split(authHeader, " ")
-
 	// 📌 Validar si el nuevo `BoardID` existe antes de mover la tarea
-	boardExists, err := h.service.BoardExists(ctx, request.NewBoardID, tokenString[1])
+	boardExists, err := h.service.BoardExists(ctx, request.NewBoardID)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error al validar el nuevo BoardID"})
 		return

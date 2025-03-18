@@ -13,14 +13,16 @@ import (
 )
 
 type TaskRepository struct {
-	collection     *mongo.Collection
-	userCollection *mongo.Collection
+	collection      *mongo.Collection
+	userCollection  *mongo.Collection
+	boardCollection *mongo.Collection
 }
 
 func NewTaskRepository() *TaskRepository {
 	return &TaskRepository{
-		collection:     config.DB.Collection("tasks"),
-		userCollection: config.DB.Collection("users"),
+		collection:      config.DB.Collection("tasks"),
+		userCollection:  config.DB.Collection("users"),
+		boardCollection: config.DB.Collection("boards"),
 	}
 }
 
@@ -155,4 +157,18 @@ func (r *TaskRepository) GetUserByID(id string) (*models.User, error) {
 		return &user, err
 	}
 	return &user, nil
+}
+
+func (r *TaskRepository) SaveBoard(board *models.Board) error {
+	_, err := r.boardCollection.InsertOne(context.Background(), board)
+	return err
+}
+
+func (r *TaskRepository) GetBoardByID(id string) (*models.Board, error) {
+	var board models.Board
+	err := r.boardCollection.FindOne(context.Background(), bson.M{"_id": id}).Decode(&board)
+	if err != nil {
+		return &board, err
+	}
+	return &board, nil
 }

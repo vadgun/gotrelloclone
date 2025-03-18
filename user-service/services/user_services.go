@@ -48,16 +48,16 @@ func (s *UserService) RegisterUser(name, email, password, phone string) error {
 
 	// Guardar usuario en la BD
 
-	var User struct {
+	var kafkaUser struct {
 		ID string `json:"id" bson:"_id"`
 	}
 
-	User.ID, err = s.repo.CreateUser(user)
+	kafkaUser.ID, err = s.repo.CreateUser(user)
 	if err != nil {
 		return err
 	}
 
-	jsonID, _ := json.Marshal(User)
+	jsonID, _ := json.Marshal(kafkaUser)
 
 	go kafka.ProduceMessage("", string(jsonID), "user-events", "new-user")
 

@@ -21,14 +21,14 @@ func StartConsumer() {
 	}
 	defer c.Close()
 
-	// Suscribirse al topic
-	topic := "user-events"
-	err = c.SubscribeTopics([]string{topic}, nil)
+	// Suscribirse a diferentes topics
+	topics := []string{"user-events", "board-events"}
+	err = c.SubscribeTopics(topics, nil)
 	if err != nil {
 		log.Fatalf("❌ Error suscribiéndose a Kafka: %v", err)
 	}
 
-	log.Println("📩 Escuchando eventos de user-service para task-service en Kafka...")
+	log.Println("📩 Escuchando eventos de user-service y board-service para task-service en Kafka...")
 
 	// Loop infinito para escuchar eventos
 	for {
@@ -53,6 +53,26 @@ func StartConsumer() {
 						log.Printf("⚠️ Error guardando usuario en task-service: %v\n", err)
 					} else {
 						log.Printf("✅ Usuario almacenado en task-service: %v\n", user)
+					}
+				}
+			case "board-events":
+				log.Printf("📨 Evento recibido | Topic: %s | Message: %s| Key: %s\n", *msg.TopicPartition.Topic, string(msg.Value), string([]byte(msg.Key)))
+				switch string([]byte(msg.Key)) {
+				case "new-board":
+					// Parsear JSON del mensaje
+					var board models.Board
+					if err := json.Unmarshal(msg.Value, &board); err != nil {
+						log.Printf("⚠️ Error parseando JSON de board: %v\n", err)
+						continue
+					}
+
+					// Guardar board en task-mongo
+					boardRepo := repositories.NewTaskRepository()
+					err = boardRepo.SaveBoard(&board)
+					if err != nil {
+						log.Printf("⚠️ Error guardando board en task-service: %v\n", err)
+					} else {
+						log.Printf("✅ Board almacenado en task-service: %v\n", board)
 					}
 				}
 			}

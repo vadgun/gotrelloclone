@@ -4,20 +4,23 @@ FROM golang:1.24 AS builder
 # Establecemos el directorio de trabajo
 WORKDIR /app
 
+# Instalamos librdkafka
+RUN apt-get update && apt-get install -y librdkafka-dev
+
 # Copiamos el código del servicio
 COPY . .
-
-# Copiamos el archivo .env del servicio
-COPY .env .
 
 # Descargamos las dependencias
 RUN go mod tidy
 
 # Compilamos el binario
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o board-service .
+RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -o board-service .
 
-# Segunda etapa: imagen ligera de ejecución
-FROM alpine:latest  
+# Segunda etapa: imagen debian-slim con soporte para librdkafka
+FROM debian:12-slim
+
+# Instalamos solo la biblioteca compartida de runtime
+RUN apt-get update && apt-get install -y librdkafka1 && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /root/
 
