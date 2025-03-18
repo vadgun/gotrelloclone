@@ -23,11 +23,10 @@ func main() {
 
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
-
 	routes.SetupNotificationRoutes(router, notificationHandler)
 
 	log.Println("🚀 notification-service corriendo en http://notification-service:8080")
-	go kafka.StartConsumer()
+	go kafka.StartConsumer(notificationHandler)
 	router.Run(":8080")
 	select {}
 }

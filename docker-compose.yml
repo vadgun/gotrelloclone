@@ -6,7 +6,7 @@ services:
       ZOOKEEPER_CLIENT_PORT: 2181
     networks:
       - kafka-net
-      
+
   kafka:
     image: confluentinc/cp-kafka:latest
     container_name: kafka
@@ -25,10 +25,9 @@ services:
       - kafka-net
     healthcheck:
       test: ["CMD-SHELL", "kafka-topics --bootstrap-server localhost:9092 --list"]
-      interval: 5s
+      interval: 10s
       timeout: 5s
-      retries: 2
-      
+      retries: 5
 
   board-service:
     build: ./board-service
@@ -39,7 +38,10 @@ services:
     networks:
       - kafka-net
     depends_on:
-      - mongo
+      mongo-board:
+        condition: service_started
+      kafka: 
+        condition: service_healthy
 
   task-service:
     build: ./task-service
@@ -48,7 +50,10 @@ services:
     env_file:
       - ./task-service/.env
     depends_on:
-      - mongo
+      mongo-task:
+        condition: service_started
+      kafka: 
+        condition: service_healthy
     networks:
       - kafka-net
 
@@ -61,7 +66,10 @@ services:
     networks:
       - kafka-net
     depends_on:
-      - mongo
+      mongo-user:
+        condition: service_started
+      kafka: 
+        condition: service_healthy
 
   notification-service:
     build: ./notification-service
@@ -72,24 +80,62 @@ services:
     networks:
       - kafka-net
     depends_on:
-      mongo:
+      user-service:
+        condition: service_started
+      mongo-notification:
         condition: service_started
       kafka: 
         condition: service_healthy
 
-  mongo:
+  mongo-board:
     image: mongo
-    container_name: mongo
+    container_name: mongo-board
     ports:
-      - "27017:27017"
+      - "27018:27017"
     volumes:
-      - mongo_data:/data/db
+      - mongo_board_data:/data/db
+    networks:
+      - kafka-net
+    command: mongod --quiet --logpath /dev/null
+
+  mongo-task:
+    image: mongo
+    container_name: mongo-task
+    ports:
+      - "27019:27017"
+    volumes:
+      - mongo_task_data:/data/db
+    networks:
+      - kafka-net
+    command: mongod --quiet --logpath /dev/null
+
+  mongo-user:
+    image: mongo
+    container_name: mongo-user
+    ports:
+      - "27020:27017"
+    volumes:
+      - mongo_user_data:/data/db
+    networks:
+      - kafka-net
+    command: mongod --quiet --logpath /dev/null
+
+  mongo-notification:
+    image: mongo
+    container_name: mongo-notification
+    ports:
+      - "27021:27017"
+    volumes:
+      - mongo_notification_data:/data/db
     networks:
       - kafka-net
     command: mongod --quiet --logpath /dev/null
 
 volumes:
-  mongo_data:
+  mongo_board_data:
+  mongo_task_data:
+  mongo_user_data:
+  mongo_notification_data:
 
 networks:
   kafka-net:

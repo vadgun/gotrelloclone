@@ -10,12 +10,12 @@ import (
 func SetupUserRoutes(router *gin.Engine, userHandler *handlers.UserHandler) {
 	userRoutes := router.Group("/users")
 	{
-		userRoutes.POST("/register", userHandler.Register)
+		userRoutes.POST("/register", userHandler.Register) // Registra un usuario - Implementar kafka producer para evitar el endpoint de verificar /:userID
 		userRoutes.POST("/login", userHandler.Login)
 
 		// 🔐 Rutas protegidas
 		userRoutes.GET("/profile", middlewares.AuthMiddleware(), userHandler.Profile)
-		userRoutes.GET("/:userID", middlewares.AuthMiddleware(), userHandler.GetUserByID)
+		userRoutes.GET("/:userID", middlewares.AuthMiddleware(), userHandler.GetUserByID) // Devuelve el usuario por userID
 	}
 
 }

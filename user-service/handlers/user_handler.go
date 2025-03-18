@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -87,7 +86,6 @@ func (c *UserHandler) Profile(ctx *gin.Context) {
 
 func (c *UserHandler) GetUserByID(ctx *gin.Context) {
 	userID := ctx.Param("userID")
-	fmt.Println(userID)
 	user, err := c.service.GetUserByID(userID)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudo obtener el usuario"})

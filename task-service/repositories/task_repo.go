@@ -13,12 +13,14 @@ import (
 )
 
 type TaskRepository struct {
-	collection *mongo.Collection
+	collection     *mongo.Collection
+	userCollection *mongo.Collection
 }
 
 func NewTaskRepository() *TaskRepository {
 	return &TaskRepository{
-		collection: config.DB.Collection("tasks"),
+		collection:     config.DB.Collection("tasks"),
+		userCollection: config.DB.Collection("users"),
 	}
 }
 
@@ -138,5 +140,10 @@ func (r *TaskRepository) UpdateTaskStatus(ctx context.Context, taskID string, st
 	if mongoResult.MatchedCount == 0 {
 		err = errors.New("id no encontrada")
 	}
+	return err
+}
+
+func (r *TaskRepository) SaveUser(user *models.UserFromUserService) error {
+	_, err := r.userCollection.InsertOne(context.Background(), user)
 	return err
 }

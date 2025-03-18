@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"context"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -41,4 +43,23 @@ func (h *NotificationHandler) SendNotification(ctx *gin.Context) {
 // Método para manejar conexiones WebSocket service
 func (h *NotificationHandler) HandleConnections(c *gin.Context) {
 	h.webSocketService.HandleConnections(c.Writer, c.Request)
+}
+
+func (h *NotificationHandler) HandleKafkaMessage(notification models.Notification) error {
+	// var notification models.Notification
+	// if err := json.Unmarshal(message.Value, &notification); err != nil {
+	// 	return fmt.Errorf("error al deserializar el mensaje: %v", err)
+	// }
+
+	// notification.CreatedAt = time.Now()
+
+	// Guardar la notificación directamente usando el repositorio
+	if err := h.service.CreateNotification(context.Background(), &notification); err != nil {
+		return fmt.Errorf("error al guardar la notificación: %v", err)
+	}
+
+	// Enviar notificación a WebSocket service
+	h.service.SendNotificationWebSocket(notification.Message)
+
+	return nil
 }

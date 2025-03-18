@@ -1,14 +1,11 @@
 package services
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 
-	"github.com/gorilla/websocket"
+	"github.com/vadgun/gotrelloclone/task-service/kafka"
 	"github.com/vadgun/gotrelloclone/task-service/models"
 	"github.com/vadgun/gotrelloclone/task-service/repositories"
 
@@ -73,7 +70,7 @@ func (s *TaskService) MoveTask(ctx context.Context, taskID, newBoardID string) e
 }
 
 func (s *TaskService) AssignTask(ctx context.Context, taskID, userID string) error {
-	s.SendNotification(userID, "Te han asignado una nueva tarea")
+	//s.SendNotification(userID, "Te han asignado una nueva tarea") Esto es verdad?
 	return s.repo.UpdateTaskAssignee(ctx, taskID, userID)
 }
 
@@ -101,30 +98,14 @@ func (s *TaskService) UserExists(ctx context.Context, userID, token string) (boo
 	return resp.StatusCode == http.StatusOK, nil
 }
 
-func (s *TaskService) UpdateTaskStatus(ctx context.Context, taskID string, status models.TaskStatus) error {
-	task, _ := s.repo.GetTaskByID(ctx, taskID)
-	s.SendNotification(task.AssigneeID, fmt.Sprintf("El estado de tu tarea '%s' ha cambiado a '%s'", task.Title, status))
-	return s.repo.UpdateTaskStatus(ctx, taskID, status)
+func (s *TaskService) UpdateTaskStatus(ctx context.Context, taskID string, status models.TaskStatus) (err error) {
+	if err := s.repo.UpdateTaskStatus(ctx, taskID, status); err != nil {
+		return err
+	}
+	return err
 }
 
-func (s *TaskService) SendNotification(userID, message string) {
-	url := "http://notification-service:8080/notify"
-	payload := map[string]string{"user_id": userID, "message": message}
-	jsonData, _ := json.Marshal(payload)
-
-	_, _ = http.Post(url, "application/json", bytes.NewBuffer(jsonData))
-
-	// Enviar a WebSocket
-	wsURL := "ws://notification-service:8080/ws"
-	conn, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
-	if err != nil {
-		log.Println("Error al conectar a WebSocket:", err)
-		return
-	}
-	defer conn.Close()
-
-	err = conn.WriteMessage(websocket.TextMessage, []byte(message))
-	if err != nil {
-		log.Println("Error al enviar mensaje WebSocket:", err)
-	}
+func (s *TaskService) SendNotification(userID, message, topic, key string) error {
+	err := kafka.ProduceMessage(userID, message, topic, key)
+	return err
 }
