@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -188,27 +187,22 @@ func (h *TaskHandler) AssignTask(ctx *gin.Context) {
 		return
 	}
 
-	fmt.Println(taskID)
+	// 📌 Validar si el usuario existe en mongo-task
+	userExists, err := h.service.UserExists(ctx, request.UserID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error al validar el usuario"})
+		return
+	}
+	if !userExists {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "El usuario no existe"})
+		return
+	}
 
-	// authHeader := ctx.GetHeader("Authorization")
-	// tokenString := strings.Split(authHeader, " ")
-
-	// 📌 Validar si el usuario asignado realmente existe en user-service
-	// userExists, err := h.service.UserExists(ctx, request.UserID, tokenString[1])
-	// if err != nil {
-	// 	ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error al validar el usuario"})
-	// 	return
-	// }
-	// if !userExists {
-	// 	ctx.JSON(http.StatusNotFound, gin.H{"error": "El usuario no existe"})
-	// 	return
-	// }
-
-	// err = h.service.AssignTask(ctx, taskID, request.UserID)
-	// if err != nil {
-	// 	ctx.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudo asignar la tarea"})
-	// 	return
-	// }
+	err = h.service.AssignTask(ctx, taskID, request.UserID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudo asignar la tarea"})
+		return
+	}
 
 	ctx.JSON(http.StatusOK, gin.H{"message": "Tarea asignada exitosamente"})
 }

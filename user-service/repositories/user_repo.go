@@ -25,13 +25,13 @@ func NewUserRepository() *UserRepository {
 }
 
 // CreateUser guarda un usuario en la base de datos.
-func (r *UserRepository) CreateUser(user *models.User) error {
+func (r *UserRepository) CreateUser(user *models.User) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	user.CreatedAt = time.Now()
-	_, err := r.collection.InsertOne(ctx, user)
-	return err
+	mongoResult, err := r.collection.InsertOne(ctx, user)
+	return mongoResult.InsertedID.(primitive.ObjectID).Hex(), err
 }
 
 // GetUserByEmail busca un usuario por su email.

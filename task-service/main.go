@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/vadgun/gotrelloclone/task-service/config"
 	"github.com/vadgun/gotrelloclone/task-service/handlers"
+	"github.com/vadgun/gotrelloclone/task-service/kafka"
 	"github.com/vadgun/gotrelloclone/task-service/repositories"
 	"github.com/vadgun/gotrelloclone/task-service/routes"
 	"github.com/vadgun/gotrelloclone/task-service/services"
@@ -31,5 +32,7 @@ func main() {
 
 	// Iniciar servidor en el puerto 8082
 	log.Println("🚀 task-service corriendo en http://task-service:8080")
+	go kafka.StartConsumer()
 	router.Run(":8080")
+	select {}
 }

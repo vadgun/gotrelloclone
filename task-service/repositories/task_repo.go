@@ -143,7 +143,16 @@ func (r *TaskRepository) UpdateTaskStatus(ctx context.Context, taskID string, st
 	return err
 }
 
-func (r *TaskRepository) SaveUser(user *models.UserFromUserService) error {
+func (r *TaskRepository) SaveUser(user *models.User) error {
 	_, err := r.userCollection.InsertOne(context.Background(), user)
 	return err
+}
+
+func (r *TaskRepository) GetUserByID(id string) (*models.User, error) {
+	var user models.User
+	err := r.userCollection.FindOne(context.Background(), bson.M{"_id": id}).Decode(&user)
+	if err != nil {
+		return &user, err
+	}
+	return &user, nil
 }

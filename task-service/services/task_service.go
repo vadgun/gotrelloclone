@@ -74,28 +74,12 @@ func (s *TaskService) AssignTask(ctx context.Context, taskID, userID string) err
 	return s.repo.UpdateTaskAssignee(ctx, taskID, userID)
 }
 
-func (s *TaskService) UserExists(ctx context.Context, userID, token string) (bool, error) {
-	// 📌 Hacemos una llamada al UserService para verificar si el usuario existe
-	url := fmt.Sprintf("http://user-service:8080/users/%s", userID)
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+func (s *TaskService) UserExists(ctx context.Context, userID string) (bool, error) {
+	_, err := s.repo.GetUserByID(userID)
 	if err != nil {
 		return false, err
 	}
-	req.Header.Add("Authorization", "Bearer "+token)
-
-	// Realizar la solicitud con un cliente HTTP
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return false, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode == http.StatusNotFound {
-		return false, nil
-	}
-
-	return resp.StatusCode == http.StatusOK, nil
+	return true, nil
 }
 
 func (s *TaskService) UpdateTaskStatus(ctx context.Context, taskID string, status models.TaskStatus) (err error) {

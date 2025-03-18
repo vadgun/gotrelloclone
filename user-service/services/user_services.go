@@ -1,6 +1,7 @@
 package services
 
 import (
+	"encoding/json"
 	"errors"
 	"time"
 
@@ -8,6 +9,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/vadgun/gotrelloclone/user-service/config"
+	"github.com/vadgun/gotrelloclone/user-service/kafka"
 	"github.com/vadgun/gotrelloclone/user-service/models"
 	"github.com/vadgun/gotrelloclone/user-service/repositories"
 )
@@ -45,7 +47,21 @@ func (s *UserService) RegisterUser(name, email, password, phone string) error {
 	}
 
 	// Guardar usuario en la BD
-	return s.repo.CreateUser(user)
+
+	var User struct {
+		ID string `json:"id" bson:"_id"`
+	}
+
+	User.ID, err = s.repo.CreateUser(user)
+	if err != nil {
+		return err
+	}
+
+	jsonID, _ := json.Marshal(User)
+
+	go kafka.ProduceMessage("", string(jsonID), "user-events", "new-user")
+
+	return nil
 }
 
 // LoginUser autentica un usuario y genera un token JWT.

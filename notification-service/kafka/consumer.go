@@ -38,7 +38,7 @@ func StartConsumer(kafkaHandler *handlers.NotificationHandler) {
 		log.Fatalf("❌ Error suscribiéndose a Kafka: %v", err)
 	}
 
-	log.Println("📩 Escuchando eventos de tareas (task-service) en Kafka...")
+	log.Println("📩 Escuchando eventos de task-service para notification-service en Kafka...")
 
 	// Loop infinito para escuchar eventos
 	for {
