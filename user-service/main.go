@@ -1,11 +1,12 @@
 package main
 
 import (
-	"log"
-
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	"github.com/vadgun/gotrelloclone/user-service/config"
 	"github.com/vadgun/gotrelloclone/user-service/handlers"
+	"github.com/vadgun/gotrelloclone/user-service/logger"
+	"github.com/vadgun/gotrelloclone/user-service/metrics"
 	"github.com/vadgun/gotrelloclone/user-service/repositories"
 	"github.com/vadgun/gotrelloclone/user-service/routes"
 	"github.com/vadgun/gotrelloclone/user-service/services"
@@ -14,6 +15,12 @@ import (
 func main() {
 	// Iniciar conexión a MongoDB
 	config.InitConfig()
+
+	// Inicializar metricas en Prometheus
+	metrics.InitMetrics()
+
+	// Inicializar el logger
+	logger.InitLogger()
 
 	// Inicializar repositorio y servicio
 	userRepo := repositories.NewUserRepository()
@@ -29,7 +36,10 @@ func main() {
 	// Configurar rutas
 	routes.SetupUserRoutes(router, userHandler)
 
+	// Envolver el manejador de Prometheus/http para rutearlo a gin
+	router.GET("/metrics", gin.WrapH(metrics.MetricsHandler()))
+
 	// Iniciar servidor en el puerto 8080
-	log.Println("🚀 user-service corriendo en http://user-service:8080")
+	logrus.Info("🚀 user-service corriendo en http://user-service:8080")
 	router.Run(":8080")
 }

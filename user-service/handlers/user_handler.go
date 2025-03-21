@@ -4,6 +4,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
+	"github.com/vadgun/gotrelloclone/user-service/metrics"
 	"github.com/vadgun/gotrelloclone/user-service/services"
 )
 
@@ -39,6 +41,15 @@ func (c *UserHandler) Register(ctx *gin.Context) {
 		return
 	}
 
+	// Incrementar la métrica cada vez que se llame este endpoint
+	metrics.HttpRequestsTotal.WithLabelValues("POST", "/users/register").Inc()
+
+	// Crear log personalizado
+	logrus.WithFields(logrus.Fields{
+		"endpoint": "/users/register",
+		"method":   "POST",
+	}).Info("Creando un nuevo usuario")
+
 	ctx.JSON(http.StatusCreated, gin.H{"message": "Usuario registrado correctamente"})
 }
 
@@ -61,6 +72,16 @@ func (c *UserHandler) Login(ctx *gin.Context) {
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
+
+	// Incrementar la métrica cada vez que se llame este endpoint
+	metrics.HttpRequestsTotal.WithLabelValues("POST", "/users/login").Inc()
+
+	// Crear log personalizado
+	logrus.WithFields(logrus.Fields{
+		"endpoint":   "/users/login",
+		"method":     "POST",
+		"user_email": req.Email,
+	}).Info("Usuario loggeado")
 
 	ctx.JSON(http.StatusOK, gin.H{"token": token})
 }

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/sirupsen/logrus"
 	"github.com/vadgun/gotrelloclone/user-service/config"
 	"github.com/vadgun/gotrelloclone/user-service/models"
 	"go.mongodb.org/mongo-driver/bson"
@@ -31,7 +32,11 @@ func (r *UserRepository) CreateUser(user *models.User) (string, error) {
 
 	user.CreatedAt = time.Now()
 	mongoResult, err := r.collection.InsertOne(ctx, user)
-	return mongoResult.InsertedID.(primitive.ObjectID).Hex(), err
+	id := mongoResult.InsertedID.(primitive.ObjectID).Hex()
+	logrus.WithFields(logrus.Fields{
+		"user_id": id,
+	}).Info("Guardando usuario en la base de datos")
+	return id, err
 }
 
 // GetUserByEmail busca un usuario por su email.

@@ -1,11 +1,35 @@
+networks:
+  kafka-network:
+    driver: bridge
+  app-network:
+    driver: bridge
+
 services:
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - app-network
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - app-network
+
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
     container_name: zookeeper
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
     networks:
-      - kafka-net
+      - kafka-network
 
   kafka:
     image: confluentinc/cp-kafka:latest
@@ -16,18 +40,33 @@ services:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     ports:
       - "9092:9092"
+      - "29092:29092"
     networks:
-      - kafka-net
+      - kafka-network
     healthcheck:
       test: ["CMD-SHELL", "kafka-topics --bootstrap-server localhost:9092 --list"]
       interval: 10s
       timeout: 5s
       retries: 5
+
+  kafka-exporter:
+    image: danielqsj/kafka-exporter
+    container_name: kafka-exporter
+    environment:
+      - KAFKA_SERVER=kafka:9092
+    ports:
+      - "9308:9308"
+    networks:
+      - app-network
+      - kafka-network
+    depends_on:
+      kafka: 
+        condition: service_healthy
 
   board-service:
     build: ./board-service
@@ -36,7 +75,8 @@ services:
     env_file:
       - ./board-service/.env
     networks:
-      - kafka-net
+      - app-network
+      - kafka-network
     depends_on:
       mongo-board:
         condition: service_started
@@ -57,7 +97,8 @@ services:
       kafka: 
         condition: service_healthy
     networks:
-      - kafka-net
+      - app-network
+      - kafka-network
 
   user-service:
     build: ./user-service
@@ -65,8 +106,14 @@ services:
       - "8080:8080"
     env_file:
       - ./user-service/.env
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
-      - kafka-net
+      - app-network
+      - kafka-network
     depends_on:
       mongo-user:
         condition: service_started
@@ -80,7 +127,8 @@ services:
     ports:
       - "8083:8080"
     networks:
-      - kafka-net
+      - app-network
+      - kafka-network
     depends_on:
       user-service:
         condition: service_started
@@ -97,7 +145,7 @@ services:
     volumes:
       - mongo_board_data:/data/db
     networks:
-      - kafka-net
+      - app-network
     command: mongod --quiet --logpath /dev/null
 
   mongo-task:
@@ -108,7 +156,7 @@ services:
     volumes:
       - mongo_task_data:/data/db
     networks:
-      - kafka-net
+      - app-network
     command: mongod --quiet --logpath /dev/null
 
   mongo-user:
@@ -119,7 +167,7 @@ services:
     volumes:
       - mongo_user_data:/data/db
     networks:
-      - kafka-net
+      - app-network
     command: mongod --quiet --logpath /dev/null
 
   mongo-notification:
@@ -130,7 +178,7 @@ services:
     volumes:
       - mongo_notification_data:/data/db
     networks:
-      - kafka-net
+      - app-network
     command: mongod --quiet --logpath /dev/null
 
 volumes:
@@ -138,7 +186,5 @@ volumes:
   mongo_task_data:
   mongo_user_data:
   mongo_notification_data:
-
-networks:
-  kafka-net:
-    driver: bridge
+  grafana_data:
+  kafka_exporter_data:
