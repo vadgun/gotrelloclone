@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"github.com/vadgun/gotrelloclone/user-service/config"
@@ -32,6 +33,9 @@ func main() {
 
 	// Configurar router Gin
 	router := gin.Default()
+
+	// Acivando CORS en default
+	router.Use(cors.Default())
 
 	// Configurar rutas
 	routes.SetupUserRoutes(router, userHandler)

@@ -67,7 +67,7 @@ func (c *UserHandler) Login(ctx *gin.Context) {
 	}
 
 	// Autenticar usuario y generar token
-	token, err := c.service.LoginUser(req.Email, req.Password)
+	token, username, err := c.service.LoginUser(req.Email, req.Password)
 	if err != nil {
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
@@ -83,7 +83,7 @@ func (c *UserHandler) Login(ctx *gin.Context) {
 		"user_email": req.Email,
 	}).Info("Usuario loggeado")
 
-	ctx.JSON(http.StatusOK, gin.H{"token": token})
+	ctx.JSON(http.StatusOK, gin.H{"token": token, "user": username})
 }
 
 // Profile devuelve la información del usuario autenticado.

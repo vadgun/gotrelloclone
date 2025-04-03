@@ -69,16 +69,16 @@ func (s *UserService) RegisterUser(name, email, password, phone string) error {
 }
 
 // LoginUser autentica un usuario y genera un token JWT.
-func (s *UserService) LoginUser(email, password string) (string, error) {
+func (s *UserService) LoginUser(email, password string) (string, string, error) {
 	user, err := s.repo.GetUserByEmail(email)
 	if err != nil {
-		return "", errors.New("usuario o contraseña incorrectos")
+		return "", "", errors.New("usuario o contraseña incorrectos")
 	}
 
 	// Verificar la contraseña
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
-		return "", errors.New("usuario o contraseña incorrectos")
+		return "", "", errors.New("usuario o contraseña incorrectos")
 	}
 
 	// Generar token JWT
@@ -90,10 +90,10 @@ func (s *UserService) LoginUser(email, password string) (string, error) {
 	// Firmar el token
 	tokenString, err := token.SignedString([]byte(config.JWTSecret))
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
-	return tokenString, nil
+	return tokenString, user.Name, nil
 }
 
 // GetUserByID busca un usuario por su ID en la base de datos.

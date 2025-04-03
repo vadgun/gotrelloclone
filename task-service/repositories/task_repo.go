@@ -166,7 +166,12 @@ func (r *TaskRepository) SaveBoard(board *models.Board) error {
 
 func (r *TaskRepository) GetBoardByID(id string) (*models.Board, error) {
 	var board models.Board
-	err := r.boardCollection.FindOne(context.Background(), bson.M{"_id": id}).Decode(&board)
+	objID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return &board, err
+	}
+
+	err = r.boardCollection.FindOne(context.Background(), bson.M{"_id": objID}).Decode(&board)
 	if err != nil {
 		return &board, err
 	}

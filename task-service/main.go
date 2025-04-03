@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/vadgun/gotrelloclone/task-service/config"
 	"github.com/vadgun/gotrelloclone/task-service/handlers"
@@ -26,6 +27,9 @@ func main() {
 
 	// Configurar router Gin
 	router := gin.Default()
+
+	// Acivando CORS en default
+	router.Use(cors.Default())
 
 	// Configurar rutas
 	routes.SetupTaskRoutes(router, taskHandler)
