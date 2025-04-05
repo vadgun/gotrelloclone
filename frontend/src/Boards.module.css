@@ -1,0 +1,102 @@
+.container {
+    padding: 20px;
+    background-color: #f4f5f7; /* Fondo similar a Trello */
+    min-height: 100vh;
+  }
+  
+  .header {
+    margin-bottom: 20px;
+  }
+  
+  .header h2 {
+    font-size: 24px;
+    color: #172b4d; /* Texto principal */
+    margin-bottom: 5px;
+  }
+  
+  .header h3 {
+    font-size: 18px;
+    color: #5e6c84; /* Texto secundario */
+    margin-bottom: 15px;
+  }
+  
+  .createBoardForm {
+    display: flex;
+    margin-bottom: 20px;
+  }
+  
+  .createBoardInput {
+    flex-grow: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 3px;
+    margin-right: 10px;
+    box-shadow: inset 0 0 0 2px #0079bf; /* Borde azul al enfocar */
+    font-size: 16px;
+  }
+  
+  .createBoardInput:focus {
+    outline: none;
+  }
+  
+  .createBoardButton {
+    background-color: #5aac44; /* Botón verde de Trello */
+    color: white;
+    border: none;
+    border-radius: 3px;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.2s ease;
+  }
+  
+  .createBoardButton:hover {
+    background-color: #61bd4f;
+  }
+  
+  .boardsList {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* Diseño de columnas flexibles */
+    gap: 15px;
+  }
+  
+  .boardItem {
+    background-color: #e2e4e6; /* Fondo de las tarjetas de tablero */
+    border-radius: 3px;
+    box-shadow: 0 1px 0 rgba(9, 30, 66, 0.25);
+    padding: 10px;
+    transition: background-color 0.2s ease;
+  }
+  
+  .boardItem:hover {
+    background-color: #d4d6d8;
+  }
+  
+  .boardLink {
+    display: block;
+    text-decoration: none;
+    color: #172b4d;
+    font-weight: bold;
+    font-size: 16px;
+    white-space: nowrap; /* Evita que el texto se rompa */
+    overflow: hidden;
+    text-overflow: ellipsis; /* Muestra "..." si el texto es demasiado largo */
+  }
+  
+  .logoutButton {
+    background-color: #f44336; /* Botón rojo para cerrar sesión */
+    color: white;
+    border: none;
+    border-radius: 3px;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 20px;
+    transition: background-color 0.2s ease;
+  }
+  
+  .logoutButton:hover {
+    background-color: #d32f2f;
+  }

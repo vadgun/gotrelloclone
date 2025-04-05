@@ -1,0 +1,111 @@
+.container {
+    padding: 20px;
+    background-color: #f4f5f7;
+    min-height: 100vh;
+  }
+  
+  .header {
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .header h3 {
+    font-size: 20px;
+    color: #172b4d;
+    margin: 0;
+  }
+  
+  .backButton {
+    background-color: #e2e4e6;
+    color: #172b4d;
+    border: none;
+    border-radius: 3px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s ease;
+  }
+  
+  .backButton:hover {
+    background-color: #d4d6d8;
+  }
+  
+  .addTaskForm {
+    display: flex;
+    margin-bottom: 20px;
+    gap: 10px;
+  }
+  
+  .taskInput {
+    padding: 10px;
+    border: none;
+    border-radius: 3px;
+    box-shadow: inset 0 0 0 2px #0079bf;
+    font-size: 16px;
+    flex-grow: 1;
+  }
+  
+  .taskInput:focus {
+    outline: none;
+  }
+  
+  .addTaskButton {
+    background-color: #5aac44;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.2s ease;
+  }
+  
+  .addTaskButton:hover {
+    background-color: #61bd4f;
+  }
+  
+  .tasksList {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .taskItem {
+    background-color: #fff;
+    border-radius: 3px;
+    box-shadow: 0 1px 0 rgba(9, 30, 66, 0.25);
+    padding: 10px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 16px;
+    color: #172b4d;
+  }
+  
+  .taskItem span {
+    flex-grow: 1;
+  }
+  
+  .logoutButton {
+    background-color: #f44336;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 20px;
+    transition: background-color 0.2s ease;
+  }
+  
+  .logoutButton:hover {
+    background-color: #d32f2f;
+  }
+  
+  .noTasks {
+    color: #5e6c84;
+    font-style: italic;
+    margin-top: 10px;
+  }

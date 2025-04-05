@@ -36,7 +36,6 @@ export const registerUser = async (userData: { email: string, password: string, 
 };
 
 const token = localStorage.getItem("token");
-const tokenHeader = { Authorization: `Bearer ${token}` }
 
 export const createTask = async (newTask: { title: string, description: string, board_id: any }) => {
   const response = await fetch(`${TASK_API_URL}/tasks`, {
@@ -49,8 +48,6 @@ export const createTask = async (newTask: { title: string, description: string, 
   });
 
   const data = await response.json();
-
-  console.log(data)
 
   if (response.ok) {
     return { success: true, task: data.task, message: data.message };
@@ -69,9 +66,9 @@ export const getBoards = async (token: any) => {
   return data.boards || [];
 };
 
-export const getTasks = async (boardID: any) => {
-  const response = await fetch(`${TASK_API_URL}/tasks/board/${boardID}`, {
-    headers: tokenHeader,
+export const getTasks = async (getTasksData: { boardID: any, token: any}) => {
+  const response = await fetch(`${TASK_API_URL}/tasks/board/${getTasksData.boardID}`, {
+    headers: { Authorization: `Bearer ${getTasksData.token}` },
   });
 
   const data = await response.json();

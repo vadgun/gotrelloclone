@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { getBoards } from "./api";
 import { Link } from "react-router-dom";
+import styles from "./Boards.module.css";
 
 interface Board {
   id: string;
@@ -42,27 +43,32 @@ function Boards({ handleLogout }: { handleLogout: () => void }) {
   }, []);
 
   return (
-    <div>
-      <h2>Bienvenido {username}</h2>
-      <h3>Mis Tableros</h3>
-      <form onSubmit={handleCreateBoard}>
+    <div className={styles.container}> {/* Aplica el contenedor principal */}
+      <div className={styles.header}>
+        <h2>Bienvenido {username}</h2>
+        <h3>Mis Tableros</h3>
+      </div>
+      <form onSubmit={handleCreateBoard} className={styles.createBoardForm}> {/* Aplica la clase al formulario */}
         <input
           type="text"
           placeholder="Nombre del tablero"
           value={boardName}
           onChange={(e) => setBoardName(e.target.value)}
           required
+          className={styles.createBoardInput} // Aplica la clase al input
         />
-        <button type="submit">Crear Tablero</button>
+        <button type="submit" className={styles.createBoardButton}>Crear Tablero</button> {/* Aplica la clase al botón */}
       </form>
-      <ul>
+      <ul className={styles.boardsList}> {/* Aplica la clase a la lista */}
         {boards.map((board: Board) => (
-          <li key={board.id}>
-            <Link to={`/boards/${board.id}`} state={{ boardName: board.name }}>{board.name}</Link> {/* 👈 Enlace a detalles del tablero */}
+          <li key={board.id} className={styles.boardItem}> {/* Aplica la clase al elemento de la lista */}
+            <Link to={`/boards/${board.id}`} state={{ boardName: board.name }} className={styles.boardLink}>
+              {board.name}
+            </Link> {/* Aplica la clase al enlace */}
           </li>
         ))}
       </ul>
-      <button onClick={handleLogout}>Cerrar Sesión</button>
+      <button onClick={handleLogout} className={styles.logoutButton}>Cerrar Sesión</button> {/* Aplica la clase al botón de cerrar sesión */}
     </div>
   );
 }

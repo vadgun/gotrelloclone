@@ -24,7 +24,7 @@ function AppWrapper() {
       {token && (
         <>
           <Route path="/boards" element={<Boards handleLogout={handleLogout} />} />
-          <Route path="/boards/:boardID" element={<BoardDetails handleLogout={handleLogout} />} />
+          <Route path="/boards/:boardID" element={<BoardDetails handleLogout={handleLogout} token={token} />} />
         </>
       )}
 
