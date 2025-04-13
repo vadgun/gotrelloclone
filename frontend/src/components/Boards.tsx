@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getBoards } from "./api";
+import { getBoards } from "../api/api";
 import { Link } from "react-router-dom";
 import styles from "./Boards.module.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';

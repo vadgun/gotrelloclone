@@ -64,12 +64,30 @@ export const getBoards = async (token: any) => {
   return data.boards || [];
 };
 
-export const getTasks = async (getTasksData: { boardID: any, token: any}) => {
-  const response = await fetch(`${TASK_API_URL}/tasks/board/${getTasksData.boardID}`, {
-    headers: { Authorization: `Bearer ${getTasksData.token}` },
-  });
+export const getTasks = async ({
+  boardID,
+  token,
+  page,
+  limit
+}: {
+  boardID: any;
+  token: string;
+  page: number;
+  limit: number;
+}) => {
+  const response = await fetch(
+    `${TASK_API_URL}/tasks/board/${boardID}?page=${page}&limit=${limit}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
 
   const data = await response.json();
-  return data || [];
-};
 
+  return {
+    tasks: data.tasks || [],
+    totalPages: data.totalPages || 1,
+  };
+};

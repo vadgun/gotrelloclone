@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"encoding/json"
+	"math"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/vadgun/gotrelloclone/task-service/models"
@@ -77,13 +79,31 @@ func (h *TaskHandler) CreateTask(ctx *gin.Context) {
 // 2️⃣ Obtener todas las tareas de un board
 func (h *TaskHandler) GetTasksByBoardID(ctx *gin.Context) {
 	boardID := ctx.Param("boardID")
-	tasks, err := h.service.GetTasksByBoardID(ctx, boardID)
+	pageStr := ctx.Query("page")
+	limitStr := ctx.Query("limit")
+
+	page, _ := strconv.ParseInt(pageStr, 10, 64)
+	limit, _ := strconv.ParseInt(limitStr, 10, 64)
+
+	if page < 1 {
+		page = 1
+	}
+	if limit < 1 {
+		limit = 10
+	}
+
+	tasks, total, err := h.service.GetTasksByBoardID(ctx, boardID, page, limit)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudieron obtener las tareas"})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, tasks)
+	ctx.JSON(http.StatusOK, gin.H{
+		"tasks":      tasks,
+		"total":      total,
+		"page":       page,
+		"totalPages": int(math.Ceil(float64(total) / float64(limit))),
+	})
 }
 
 // 3️⃣ Obtener una tarea específica

@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { BrowserRouter as Router, Route, Routes, Navigate, useNavigate } from "react-router-dom";
-import Login from './Login.tsx'
-import Boards from './Boards.tsx'
-import BoardDetails from './BoardDetails.tsx';
+import Login from './components/Login.tsx'
+import Boards from './components/Boards.tsx'
+import BoardDetails from './components/BoardDetails.tsx';
 
 function AppWrapper() {
   const [token, setToken] = useState(localStorage.getItem("token") || "");

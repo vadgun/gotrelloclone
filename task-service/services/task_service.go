@@ -22,8 +22,8 @@ func (s *TaskService) CreateTask(ctx context.Context, task *models.Task, userID 
 	return s.repo.CreateTask(ctx, task, userID)
 }
 
-func (s *TaskService) GetTasksByBoardID(ctx context.Context, boardID string) ([]models.Task, error) {
-	return s.repo.GetTasksByBoardID(ctx, boardID)
+func (s *TaskService) GetTasksByBoardID(ctx context.Context, boardID string, page, limit int64) ([]models.Task, int64, error) {
+	return s.repo.GetTasksByBoardID(ctx, boardID, page, limit)
 }
 
 func (s *TaskService) GetTaskByID(ctx context.Context, taskID string) (*models.Task, error) {

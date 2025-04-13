@@ -10,6 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type TaskRepository struct {
@@ -37,22 +38,34 @@ func (r *TaskRepository) CreateTask(ctx context.Context, task *models.Task, user
 }
 
 // 2️⃣ Obtener todas las tareas de un board
-func (r *TaskRepository) GetTasksByBoardID(ctx context.Context, boardID string) ([]models.Task, error) {
+func (r *TaskRepository) GetTasksByBoardID(ctx context.Context, boardID string, page, limit int64) ([]models.Task, int64, error) {
 	var tasks []models.Task
-	cursor, err := r.collection.Find(ctx, bson.M{"board_id": boardID})
+
+	skip := (page - 1) * limit
+	findOptions := options.Find().
+		SetSkip(skip).
+		SetLimit(limit)
+
+	cursor, err := r.collection.Find(ctx, bson.M{"board_id": boardID}, findOptions)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer cursor.Close(ctx)
 
 	for cursor.Next(ctx) {
 		var task models.Task
 		if err := cursor.Decode(&task); err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		tasks = append(tasks, task)
 	}
-	return tasks, nil
+
+	count, err := r.collection.CountDocuments(ctx, bson.M{"board_id": boardID})
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return tasks, count, nil
 }
 
 // 3️⃣ Obtener una tarea específica

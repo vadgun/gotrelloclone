@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { loginUser, registerUser } from "./api";
+import { loginUser, registerUser } from "../api/api";
 import styles from './Login.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
