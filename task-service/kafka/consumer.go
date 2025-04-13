@@ -74,6 +74,23 @@ func StartConsumer() {
 					} else {
 						log.Printf("✅ Board almacenado en task-service: %v\n", board)
 					}
+				case "drop-board":
+					// Parsear JSON del mensaje
+					var board models.Board
+
+					if err := json.Unmarshal(msg.Value, &board); err != nil {
+						log.Printf("⚠️ Error parseando JSON de board: %v\n", err)
+						continue
+					}
+
+					// Eliminar board en task-mongo
+					boardRepo := repositories.NewTaskRepository()
+					err = boardRepo.DeleteBoard(&board)
+					if err != nil {
+						log.Printf("⚠️ Error eliminando board en task-service: %v\n", err)
+					} else {
+						log.Printf("✅ Board eliminado en task-service: %v\n", board)
+					}
 				}
 			}
 		} else {

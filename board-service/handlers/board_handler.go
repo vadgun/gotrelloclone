@@ -58,3 +58,34 @@ func (h *BoardHandler) GetBoardByID(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, tasks)
 }
+
+func (h *BoardHandler) DeleteBoardByID(ctx *gin.Context) {
+	boardID := ctx.Param("boardID")
+	err := h.service.DeleteBoardByID(boardID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudo eliminar el tablero"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, "")
+}
+
+func (h *BoardHandler) UpdateBoardByID(ctx *gin.Context) {
+	boardID := ctx.Param("boardID")
+	var request struct {
+		Name string `json:"name" binding:"required"`
+	}
+
+	if err := ctx.ShouldBindJSON(&request); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err := h.service.UpdateBoardByID(boardID, request.Name)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudo actualizar el tablero"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, "")
+}

@@ -51,3 +51,19 @@ func (s *BoardService) GetBoardsByUser(userID string) ([]models.Board, error) {
 func (s *BoardService) GetBoardByID(boardID string) (*models.Board, error) {
 	return s.repo.GetBoardByID(boardID)
 }
+
+func (s *BoardService) DeleteBoardByID(boardID string) error {
+
+	var kafkaBoard struct {
+		ID string `json:"id" bson:"_id"`
+	}
+	kafkaBoard.ID = boardID
+
+	jsonID, _ := json.Marshal(kafkaBoard)
+	go kafka.ProduceMessage("", string(jsonID), "board-events", "drop-board")
+	return s.repo.DeleteBoardByID(boardID)
+}
+
+func (s *BoardService) UpdateBoardByID(boardID, newBoardName string) error {
+	return s.repo.UpdateBoardByID(boardID, newBoardName)
+}

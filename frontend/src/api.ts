@@ -1,5 +1,3 @@
-import { data } from "react-router-dom";
-
 const USER_API_URL = "http://localhost:8080"; // Endpoint de user-service
 const BOARD_API_URL = "http://localhost:8081"; // Endpoint de board-service
 const TASK_API_URL = "http://localhost:8082"; // Endpoint de task-service

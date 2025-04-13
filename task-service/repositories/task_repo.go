@@ -145,11 +145,13 @@ func (r *TaskRepository) UpdateTaskStatus(ctx context.Context, taskID string, st
 	return err
 }
 
+// 9️⃣ Guarda el usuario al recibir un evento de Kafka
 func (r *TaskRepository) SaveUser(user *models.User) error {
 	_, err := r.userCollection.InsertOne(context.Background(), user)
 	return err
 }
 
+// 🔟 Obtiene el usuario por ID en la base de datos de mongo-task
 func (r *TaskRepository) GetUserByID(id string) (*models.User, error) {
 	var user models.User
 	err := r.userCollection.FindOne(context.Background(), bson.M{"_id": id}).Decode(&user)
@@ -159,11 +161,27 @@ func (r *TaskRepository) GetUserByID(id string) (*models.User, error) {
 	return &user, nil
 }
 
+// 1️⃣1️⃣ Guarda el tablero ar recibir un evento de Kafka
 func (r *TaskRepository) SaveBoard(board *models.Board) error {
 	_, err := r.boardCollection.InsertOne(context.Background(), board)
 	return err
 }
 
+// 1️⃣2️⃣ Elimina un tablero al recibir un evento de Kafka
+func (r *TaskRepository) DeleteBoard(board *models.Board) error {
+	mongoResult, err := r.boardCollection.DeleteOne(context.Background(), board)
+	if err != nil {
+		return err
+	}
+
+	if mongoResult.DeletedCount == 0 {
+		return errors.New("tablero no encontrado")
+	}
+
+	return nil
+}
+
+// 1️⃣3️⃣ Obtiene el tablero por ID en la base de datos de mongo-task
 func (r *TaskRepository) GetBoardByID(id string) (*models.Board, error) {
 	var board models.Board
 	objID, err := primitive.ObjectIDFromHex(id)

@@ -13,4 +13,10 @@ func SetupBoardRoutes(router *gin.Engine, handler *handlers.BoardHandler) {
 	boardGroup.POST("", handler.CreateBoard)
 	boardGroup.GET("", handler.GetBoards)
 	boardGroup.GET("/:boardID", handler.GetBoardByID)
+
+	//Eliminar un Board por id y que este avise a Kafka para eliminarlo de task-service
+	boardGroup.DELETE("/:boardID", handler.DeleteBoardByID)
+
+	//Modificar el nombre de un board
+	boardGroup.PUT("/:boardID", handler.UpdateBoardByID)
 }
