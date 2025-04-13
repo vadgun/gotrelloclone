@@ -1,3 +1,37 @@
 body {
-font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  margin: 0; /* Asegúrate de no tener márgenes en el body que puedan interferir */
+  padding: 0; /* Asegúrate de no tener paddings en el body que puedan interferir */
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* Asegura que ocupe al menos la altura de la ventana */
+}
+
+.main-content {
+  flex-grow: 1; /* Permite que crezca y ocupe el espacio restante */
+  padding: 20px; /* Mantén tu padding para el contenido */
+  overflow-y: auto; /* Para el scroll si el contenido es largo */
+}
+
+footer {
+  background-color: #f4f5f7;
+  color: #5e6c84;
+  padding: 10px 20px;
+  text-align: center;
+  font-size: 0.9rem;
+  border-top: 1px solid #e2e4e6;
 }

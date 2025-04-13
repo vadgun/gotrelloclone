@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import styles from "./BoardDetails.module.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrashCan, faPencil } from '@fortawesome/free-solid-svg-icons';
+import Swal from 'sweetalert2';
 
 interface Task {
   id: string;
@@ -14,7 +15,7 @@ interface Task {
   status: 'TODO' | 'IN_PROGRESS' | 'DONE';
 }
 
-function BoardDetails({ handleLogout, token }: { handleLogout: () => void; token: any; }) {
+function BoardDetails({ token }: { token: any; }) {
   const { boardID } = useParams();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [title, setTitle] = useState("");
@@ -41,11 +42,11 @@ function BoardDetails({ handleLogout, token }: { handleLogout: () => void; token
     if (response.success) {
       const newTask = response.task;
       setTasks([...tasks, newTask]);
-      alert(response.message);
+      Swal.fire('Creada!', response.message, 'success');
       setTitle("");
       setDescription("");
     } else {
-      alert("Error al agregar tarea");
+      Swal.fire('Error', 'Error al agregar tarea', 'error');
     }
   };
 
@@ -97,26 +98,39 @@ function BoardDetails({ handleLogout, token }: { handleLogout: () => void; token
       setTasks(updated);
       closeModal();
     } else {
-      alert("Error al actualizar la tarea");
+      Swal.fire('Error', 'Error al actualizar la tarea', 'error');
     }
   }
 
   const handleDeleteTask = async (taskId: string) => {
-    const confirmed = window.confirm("¿Seguro que quieres eliminar esta tarea?");
-    if (!confirmed) return;
-
-    const response = await fetch(`http://localhost:8082/tasks/${taskId}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: 'Esta acción no se puede deshacer',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const response = await fetch(`http://localhost:8082/tasks/${taskId}`, {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+  
+          if (response.ok) {
+            setTasks(tasks.filter((task) => task.id !== taskId));
+            Swal.fire('¡Eliminado!', 'La tarea ha sido eliminada', 'success');
+          } else {
+            Swal.fire('Error', 'Error al eliminar la tarea', 'error');
+          }
+        } catch (error) {
+          Swal.fire('Error', 'Error en la conexión', 'error');
+        }
+      }
     });
-
-    if (response.ok) {
-      setTasks(tasks.filter((task) => task.id !== taskId));
-    } else {
-      alert("Error al eliminar la tarea");
-    }
   };
 
   const getHumanReadableStatus = (status: 'TODO' | 'IN_PROGRESS' | 'DONE') => {
@@ -159,8 +173,9 @@ function BoardDetails({ handleLogout, token }: { handleLogout: () => void; token
         t.id === task.id ? { ...t, status: newStatus } : t
       );
       setTasks(updatedTasks);
+      Swal.fire('Actualizado!', 'Actualizado a ' + getHumanReadableStatus(newStatus), 'success');
     } else {
-      alert("Error al actualizar el estado de la tarea");
+      Swal.fire('Error', 'Error al actualizar el estado de la tarea', 'error');
     }
   };
 
@@ -271,9 +286,6 @@ function BoardDetails({ handleLogout, token }: { handleLogout: () => void; token
           ))}
         </ul>
       )}
-      <button onClick={handleLogout} className={styles.logoutButton}>
-        Cerrar Sesión
-      </button>
       {isModalOpen && (
         <div className={styles.modalOverlay}>
           <div className={styles.modal}>

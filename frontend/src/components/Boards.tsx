@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import styles from "./Boards.module.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrashCan, faPencil } from '@fortawesome/free-solid-svg-icons';
+import Swal from 'sweetalert2';
 
 interface Board {
   id: string;
@@ -12,11 +13,10 @@ interface Board {
   created_at: string;
 }
 
-function Boards({ handleLogout }: { handleLogout: () => void }) {
+function Boards() {
   const [boards, setBoards] = useState<Board[]>([]);
   const [boardName, setBoardName] = useState("");
   const token = localStorage.getItem("token");
-  const username = localStorage.getItem("username");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editBoard, setEditBoard] = useState<Board | null>(null);
   const [editName, setEditName] = useState("");
@@ -39,7 +39,7 @@ function Boards({ handleLogout }: { handleLogout: () => void }) {
       setBoards([...boards, newBoard]); // Agrega el nuevo tablero a la lista
       setBoardName(""); // Limpia el input
     } else {
-      alert("Error al crear el tablero");
+      Swal.fire('Error', 'Error al crear el tablero', 'error');
     }
   };
 
@@ -48,21 +48,34 @@ function Boards({ handleLogout }: { handleLogout: () => void }) {
   }, []);
 
   const handleDeleteBoard = async (boardId: string) => {
-    const confirmed = window.confirm("¿Estás seguro de eliminar este tablero?");
-    if (!confirmed) return;
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: 'Esta acción no se puede deshacer',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const response = await fetch(`http://localhost:8081/boards/${boardId}`, {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
 
-    const response = await fetch(`http://localhost:8081/boards/${boardId}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+          if (response.ok) {
+            setBoards(boards.filter((board) => board.id !== boardId));
+            Swal.fire('¡Eliminado!', 'El tablero ha sido eliminado', 'success');
+          } else {
+            Swal.fire('Error', 'Error al eliminar el tablero', 'error');
+          }
+        } catch (error) {
+          Swal.fire('Error', 'Error en la conexión', 'error');
+        }
+      }
     });
-
-    if (response.ok) {
-      setBoards(boards.filter((board) => board.id !== boardId));
-    } else {
-      alert("Error al eliminar el tablero");
-    }
   };
 
   const openEditModal = (board: Board) => {
@@ -96,14 +109,13 @@ function Boards({ handleLogout }: { handleLogout: () => void }) {
       setBoards(updatedBoards);
       closeModal();
     } else {
-      alert("Error al actualizar el tablero");
+      Swal.fire('Error', 'Error al actualizar el tablero', 'error');
     }
   }
 
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h2>Bienvenido {username}</h2>
         <h3>Mis Tableros</h3>
       </div>
       <form onSubmit={handleCreateBoard} className={styles.createBoardForm}>
@@ -145,7 +157,6 @@ function Boards({ handleLogout }: { handleLogout: () => void }) {
           </Link>
         ))}
       </ul>
-      <button onClick={handleLogout} className={styles.logoutButton}>Cerrar Sesión</button>
       {isModalOpen && (
         <div className={styles.modalOverlay}>
           <div className={styles.modal}>

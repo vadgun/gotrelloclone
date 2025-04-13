@@ -73,7 +73,7 @@ func (h *TaskHandler) CreateTask(ctx *gin.Context) {
 
 	// Publicar evento en Kafka
 	// err = kafka.ProduceMessage("task-events", "new-task", string(taskJSON))
-	ctx.JSON(http.StatusCreated, gin.H{"message": "Tarea creada y notificacion enviada exitosamente", "task": &task})
+	ctx.JSON(http.StatusCreated, gin.H{"message": "La tarea ha sido creada", "task": &task})
 }
 
 // 2️⃣ Obtener todas las tareas de un board

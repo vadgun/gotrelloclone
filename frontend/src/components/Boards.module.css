@@ -2,7 +2,7 @@
   padding: 20px;
   background-color: #f4f5f7;
   /* Fondo similar a Trello */
-  min-height: 100vh;
+  {{/* min-height: 100vh; */}}
 }
 
 .header {
