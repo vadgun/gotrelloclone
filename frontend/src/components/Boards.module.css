@@ -59,6 +59,12 @@
   background-color: #61bd4f;
 }
 
+.noBoards {
+  color: #5e6c84;
+  font-style: italic;
+  margin-top: 10px;
+}
+
 .boardsList {
   list-style: none;
   padding: 0;

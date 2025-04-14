@@ -3,15 +3,14 @@ import { loginUser, registerUser } from "../api/api";
 import styles from './Login.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+import Swal from 'sweetalert2';
 
-
-function Login({ token, setToken }: { token: string; setToken: (token: string) => void }) {
+function Login({ token, setToken, setUserName }: { token: string; setToken: (token: string) => void; setUserName: (username:string) => void }) {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
   const [name, setName] = useState("");
-  const [_, setUser] = useState("");
   const [isRegistering, setIsRegistering] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -25,9 +24,9 @@ function Login({ token, setToken }: { token: string; setToken: (token: string) =
       localStorage.setItem("token", result.token);
       localStorage.setItem("username", result.user)
       setToken(result.token);
-      setUser(result.user);
+      setUserName(result.user);
     } else {
-      alert("Error: " + result.error);
+      Swal.fire('Error', result.error, 'error');
     }
   };
 
@@ -38,17 +37,16 @@ function Login({ token, setToken }: { token: string; setToken: (token: string) =
   const handleRegister = async (e: any) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      alert('Las contraseñas no coinciden.');
+      Swal.fire('Error', 'Las contraseñas no coinciden.', 'error');
       return;
     }
 
     const result = await registerUser({ email, password, name, phone });
-
     if (result.success) {
-      alert("Registro exitoso, ahora inicia sesión.");
+      Swal.fire('Creada!',"Registro exitoso, ahora inicia sesión.", 'success');
       setIsRegistering(false);
     } else {
-      alert("Error: " + result.error);
+      Swal.fire('Error', result.error, 'error');
     }
   };
 

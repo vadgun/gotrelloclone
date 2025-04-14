@@ -1,7 +1,7 @@
 const Footer = () => {
     return (
       <footer>
-        © {new Date().getFullYear()} Go & React — Todos los derechos reservados.
+        © {new Date().getFullYear()} Go & React Boards — Todos los derechos reservados.
       </footer>
     );
   };

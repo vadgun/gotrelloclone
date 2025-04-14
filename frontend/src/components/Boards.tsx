@@ -129,34 +129,38 @@ function Boards() {
         />
         <button type="submit" className={styles.createBoardButton}>Crear Tablero</button>
       </form>
-      <ul className={styles.boardsList}>
-        {boards.map((board: Board) => (
-          <Link
-            to={`/boards/${board.id}`}
-            state={{ boardName: board.name }}
-            className={styles.boardLink}
-            key={board.id}
-          >
-            <li className={styles.boardItem}>
-              <span className={styles.boardName}>{board.name}</span>
-              <button className={styles.editButton} onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                openEditModal(board);
-              }}>
-                <FontAwesomeIcon icon={faPencil} />
-              </button>
-              <button className={styles.deleteButton} onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                handleDeleteBoard(board.id);
-              }}>
-                <FontAwesomeIcon icon={faTrashCan} />
-              </button>
-            </li>
-          </Link>
-        ))}
-      </ul>
+      {boards.length === 0 ? (
+        <p className={styles.noBoards}>No hay tableros disponibles</p>
+      ) : (
+        <ul className={styles.boardsList}>
+          {boards.map((board: Board) => (
+            <Link
+              to={`/boards/${board.id}`}
+              state={{ boardName: board.name }}
+              className={styles.boardLink}
+              key={board.id}
+            >
+              <li className={styles.boardItem}>
+                <span className={styles.boardName}>{board.name}</span>
+                <button className={styles.editButton} onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  openEditModal(board);
+                }}>
+                  <FontAwesomeIcon icon={faPencil} />
+                </button>
+                <button className={styles.deleteButton} onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  handleDeleteBoard(board.id);
+                }}>
+                  <FontAwesomeIcon icon={faTrashCan} />
+                </button>
+              </li>
+            </Link>
+          ))}
+        </ul>
+      )}
       {isModalOpen && (
         <div className={styles.modalOverlay}>
           <div className={styles.modal}>

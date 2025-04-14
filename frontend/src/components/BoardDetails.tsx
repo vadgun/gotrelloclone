@@ -192,7 +192,7 @@ function BoardDetails({ token }: { token: any; }) {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h3 className={styles.boardTitle}>Tareas del Tablero: {boardName}</h3>
+        <h3 className={styles.boardTitle}>{boardName}</h3>
         <button onClick={handleGoToBoards} className={styles.backButton}>
           Ir a Tableros
         </button>

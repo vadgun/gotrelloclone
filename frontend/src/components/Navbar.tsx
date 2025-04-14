@@ -1,12 +1,21 @@
 import styles from './Navbar.module.css'; // opcional para estilizar
 import Swal from 'sweetalert2';
+import { useEffect } from 'react';
 
 interface NavbarProps {
-  username: string;
+  userName: string;
+  setUserName: (username: string) => void;
   handleLogout: () => void;
 }
 
-const Navbar = ({ username, handleLogout }: NavbarProps) => {
+const Navbar = ({ userName, setUserName, handleLogout }: NavbarProps) => {
+  useEffect(() => {
+    const storedUsername = localStorage.getItem("username");
+    if (storedUsername && storedUsername !== userName) {
+      setUserName(storedUsername);
+    }
+  }, [userName, setUserName]);
+
   const onLogoutClick = () => {
     Swal.fire({
       title: '¿Cerrar sesión?',
@@ -24,7 +33,7 @@ const Navbar = ({ username, handleLogout }: NavbarProps) => {
 
   return (
     <nav className={styles.navbar}>
-      <div className={styles.username}>Hola, {username}</div>
+      <div className={styles.username}>Hola, {userName}</div>
       <button className={styles.logoutButton} onClick={onLogoutClick}>
         Cerrar sesión
       </button>

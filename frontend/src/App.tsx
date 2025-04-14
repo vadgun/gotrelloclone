@@ -9,7 +9,7 @@ import './index.css'
 
 function AppWrapper() {
   const [token, setToken] = useState(localStorage.getItem("token") || "");
-  const [username] = useState(localStorage.getItem("username") || "");
+  const [userName, setUserName] = useState(localStorage.getItem("username") || "");
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -21,11 +21,11 @@ function AppWrapper() {
 
   return (
     <div className="app-container">
-      {token && <Navbar username={username} handleLogout={handleLogout} />}
+      {token && <Navbar userName={userName} setUserName={setUserName} handleLogout={handleLogout} />}
       <div className="main-content">
         <Routes>
           {/* Si el usuario no está autenticado, lo enviamos a Login */}
-          <Route path="/" element={token ? <Navigate to="/boards" /> : <Login token={token} setToken={setToken} />} />
+          <Route path="/" element={token ? <Navigate to="/boards" /> : <Login token={token} setToken={setToken} setUserName={setUserName} />} />
 
           {/* Rutas privadas */}
           {token && (
