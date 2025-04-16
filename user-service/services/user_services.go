@@ -25,7 +25,7 @@ func NewUserService(repo *repositories.UserRepository) *UserService {
 }
 
 // RegisterUser registra un usuario con contraseña encriptada.
-func (s *UserService) RegisterUser(name, email, password, phone string) error {
+func (s *UserService) RegisterUser(name, email, password, phone, role string) error {
 	// Verificar si el usuario ya existe
 	existingUser, _ := s.repo.GetUserByEmail(email)
 	if existingUser != nil {
@@ -44,6 +44,7 @@ func (s *UserService) RegisterUser(name, email, password, phone string) error {
 		Email:    email,
 		Password: string(hashedPassword),
 		Phone:    phone,
+		Role:     role,
 	}
 
 	var kafkaUser struct {
@@ -69,34 +70,40 @@ func (s *UserService) RegisterUser(name, email, password, phone string) error {
 }
 
 // LoginUser autentica un usuario y genera un token JWT.
-func (s *UserService) LoginUser(email, password string) (string, string, error) {
+func (s *UserService) LoginUser(email, password string) (string, *models.User, error) {
 	user, err := s.repo.GetUserByEmail(email)
 	if err != nil {
-		return "", "", errors.New("usuario o contraseña incorrectos")
+		return "", nil, errors.New("usuario o contraseña incorrectos")
 	}
 
 	// Verificar la contraseña
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
-		return "", "", errors.New("usuario o contraseña incorrectos")
+		return "", nil, errors.New("usuario o contraseña incorrectos")
 	}
 
 	// Generar token JWT
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user_id": user.ID.Hex(),
 		"exp":     time.Now().Add(time.Hour * 24).Unix(), // Expira en 24h
+		"role":    user.Role,
 	})
 
 	// Firmar el token
 	tokenString, err := token.SignedString([]byte(config.JWTSecret))
 	if err != nil {
-		return "", "", err
+		return "", user, err
 	}
 
-	return tokenString, user.Name, nil
+	return tokenString, user, nil
 }
 
 // GetUserByID busca un usuario por su ID en la base de datos.
 func (s *UserService) GetUserByID(userID string) (*models.User, error) {
 	return s.repo.GetUserByID(userID)
+}
+
+// GetAllUsers
+func (s *UserService) GetAllUsers() ([]models.User, error) {
+	return s.repo.GetAllUsers()
 }

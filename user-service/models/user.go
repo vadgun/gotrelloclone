@@ -13,5 +13,6 @@ type User struct {
 	Email     string             `bson:"email" json:"email"`
 	Phone     string             `bson:"phone" json:"phone"`
 	Password  string             `bson:"password,omitempty"` // No devolver la contraseña en JSON
+	Role      string             `bson:"role" json:"role"`
 	CreatedAt time.Time          `bson:"created_at" json:"created_at"`
 }

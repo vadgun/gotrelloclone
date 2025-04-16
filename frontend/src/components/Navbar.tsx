@@ -1,20 +1,33 @@
 import styles from './Navbar.module.css'; // opcional para estilizar
 import Swal from 'sweetalert2';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface NavbarProps {
   userName: string;
+  role: string;
   setUserName: (username: string) => void;
+  setRole: (role: string) => void;
   handleLogout: () => void;
 }
 
-const Navbar = ({ userName, setUserName, handleLogout }: NavbarProps) => {
+const Navbar = ({ userName, role, setUserName, setRole, handleLogout }: NavbarProps) => {
+  const [isAdmin, setIsAdmin] = useState(false);
+  const navigate = useNavigate();
+
   useEffect(() => {
     const storedUsername = localStorage.getItem("username");
+    const storedRole = localStorage.getItem("role");
+
+    if (storedRole && storedRole !== role) {
+      setRole(storedRole);
+    }
+
+    if (storedRole === "admin") setIsAdmin(true);
     if (storedUsername && storedUsername !== userName) {
       setUserName(storedUsername);
     }
-  }, [userName, setUserName]);
+  }, [userName, setUserName, role, setRole]);
 
   const onLogoutClick = () => {
     Swal.fire({
@@ -34,6 +47,7 @@ const Navbar = ({ userName, setUserName, handleLogout }: NavbarProps) => {
   return (
     <nav className={styles.navbar}>
       <div className={styles.username}>Hola, {userName}</div>
+      {isAdmin && (<button onClick={() => navigate("/admin")} className={styles.adminButton}>Administración</button>)}
       <button className={styles.logoutButton} onClick={onLogoutClick}>
         Cerrar sesión
       </button>

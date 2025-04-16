@@ -12,7 +12,7 @@ export const loginUser = async (email: string, password: string) => {
   const data = await response.json();
 
   if (response.ok) {
-    return { success: true, token: data.token, user: data.user };
+    return { success: true, token: data.token, user: data.user, role: data.role };
   } else {
     return { success: false, error: data.error };
   }
@@ -33,14 +33,12 @@ export const registerUser = async (userData: { email: string, password: string, 
   }
 };
 
-const token = localStorage.getItem("token");
-
-export const createTask = async (newTask: { title: string, description: string, board_id: any }) => {
+export const createTask = async (newTask: { title: string, description: string, board_id: any, token: any }) => {
   const response = await fetch(`${TASK_API_URL}/tasks`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${token}`,
+      "Authorization": `Bearer ${newTask.token}`,
     },
     body: JSON.stringify(newTask),
   });

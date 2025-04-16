@@ -37,7 +37,7 @@ function BoardDetails({ token }: { token: any; }) {
   const handleNewTask = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const response = await createTask({ title, description, board_id: boardID })
+    const response = await createTask({ title, description, board_id: boardID, token: token })
 
     if (response.success) {
       const newTask = response.task;
@@ -119,10 +119,10 @@ function BoardDetails({ token }: { token: any; }) {
               Authorization: `Bearer ${token}`,
             },
           });
-  
+
           if (response.ok) {
             setTasks(tasks.filter((task) => task.id !== taskId));
-            Swal.fire('¡Eliminado!', 'La tarea ha sido eliminada', 'success');
+            Swal.fire('¡Eliminada!', 'La tarea ha sido eliminada', 'success');
           } else {
             Swal.fire('Error', 'Error al eliminar la tarea', 'error');
           }

@@ -27,3 +27,19 @@
   .logoutButton:hover {
     background-color: #d4d6d8; /* Ligeramente más oscuro al pasar el ratón */
   }
+
+  .adminButton {
+  background-color: #007bff; /* Un color distintivo para administración */
+  color: white;
+  border: none;
+  border-radius: 3px;
+  padding: 10px 15px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.2s ease;
+  text-decoration: none; /* Por si acaso hereda estilos de enlace */
+}
+
+.adminButton:hover {
+  background-color: #0056b3;
+}

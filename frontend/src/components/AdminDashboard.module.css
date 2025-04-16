@@ -1,0 +1,48 @@
+.dashboard {
+  padding: 20px;
+  background-color: #f4f5f7; /* Fondo claro similar a Trello */
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard h2 {
+  color: #172b4d; /* Texto principal de Trello */
+  margin-bottom: 20px;
+  font-size: 24px;
+}
+
+.dashboard p {
+  color: #5e6c84; /* Texto secundario de Trello */
+  font-style: italic;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse; /* Evita bordes dobles entre celdas */
+  background-color: #fff;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden; /* Para que el border-radius afecte también al contenido */
+}
+
+.table thead th {
+  background-color: #e2e4e6; /* Encabezado gris claro */
+  color: #172b4d;
+  font-weight: bold;
+  text-align: left;
+  padding: 12px 15px;
+  border-bottom: 1px solid #cdd2d6;
+}
+
+.table tbody td {
+  padding: 10px 15px;
+  border-bottom: 1px solid #e2e4e6;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none; /* Elimina el borde inferior de la última fila */
+}
+
+.table tbody tr:nth-child(even) {
+  background-color: #f9f9f9; /* Fondo ligeramente diferente para filas pares */
+}

@@ -73,3 +73,24 @@ func (r *UserRepository) GetUserByID(userID string) (*models.User, error) {
 
 	return &user, nil
 }
+
+// GetAllUsers busca todos los usuarios en la base de datos
+func (r *UserRepository) GetAllUsers() ([]models.User, error) {
+	var users []models.User
+
+	cursor, err := r.collection.Find(context.TODO(), bson.M{})
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(context.TODO())
+
+	for cursor.Next(context.TODO()) {
+		var user models.User
+		if err := cursor.Decode(&user); err != nil {
+			return nil, err
+		}
+		users = append(users, user)
+	}
+
+	return users, nil
+}

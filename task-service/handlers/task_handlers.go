@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"math"
 	"net/http"
 	"strconv"
@@ -24,7 +25,9 @@ func NewTaskHandler(service *services.TaskService) *TaskHandler {
 // 1️⃣ Crear tarea
 func (h *TaskHandler) CreateTask(ctx *gin.Context) {
 	var task models.Task
+	fmt.Println("WTF!")
 	if err := ctx.ShouldBindJSON(&task); err != nil {
+		fmt.Println("Datos inválidos")
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos"})
 		return
 	}
@@ -34,16 +37,19 @@ func (h *TaskHandler) CreateTask(ctx *gin.Context) {
 	// 📌 Validar si el BoardID existe antes de crear la tarea
 	boardExists, err := h.service.BoardExists(ctx, task.BoardID)
 	if err != nil {
+		fmt.Println("Error al validar el BoardID")
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error al validar el BoardID"})
 		return
 	}
 	if !boardExists {
+		fmt.Println("El Board no existe")
 		ctx.JSON(http.StatusNotFound, gin.H{"error": "El Board no existe"})
 		return
 	}
 
 	id, err := h.service.CreateTask(ctx, &task, userID.(string))
 	if err != nil {
+		fmt.Println("No se pudo crear la tarea")
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudo crear la tarea"})
 		return
 	}
@@ -64,6 +70,7 @@ func (h *TaskHandler) CreateTask(ctx *gin.Context) {
 
 	err = h.service.SendNotification(userID.(string), string(taskJSON), "task-events", "new-task")
 	if err != nil {
+		fmt.Println("Error enviando evento a Kafka")
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error enviando evento a Kafka"})
 		return
 	}

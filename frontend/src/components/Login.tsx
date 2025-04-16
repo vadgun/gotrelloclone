@@ -5,7 +5,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import Swal from 'sweetalert2';
 
-function Login({ token, setToken, setUserName }: { token: string; setToken: (token: string) => void; setUserName: (username:string) => void }) {
+function Login({ token, setToken, setUserName, setRole}: { 
+  token: string; setToken: (token: string) => void; 
+  setUserName: (username:string) => void;
+  setRole: (role:string) => void 
+}) {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -21,10 +25,15 @@ function Login({ token, setToken, setUserName }: { token: string; setToken: (tok
     const result = await loginUser(email, password);
 
     if (result.success) {
+
+      console.log(result.role)
+
       localStorage.setItem("token", result.token);
       localStorage.setItem("username", result.user)
+      localStorage.setItem("role", result.role);
       setToken(result.token);
       setUserName(result.user);
+      setRole(result.role)
     } else {
       Swal.fire('Error', result.error, 'error');
     }
