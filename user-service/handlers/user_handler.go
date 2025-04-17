@@ -5,9 +5,10 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
+	"github.com/vadgun/gotrelloclone/user-service/infra/logger"
 	"github.com/vadgun/gotrelloclone/user-service/infra/metrics"
 	"github.com/vadgun/gotrelloclone/user-service/services"
+	"go.uber.org/zap"
 )
 
 // UserController maneja las peticiones HTTP de usuario.
@@ -51,10 +52,7 @@ func (c *UserHandler) Register(ctx *gin.Context) {
 	metrics.HttpRequestsTotal.WithLabelValues("POST", "/users/register").Inc()
 
 	// Crear log personalizado
-	logrus.WithFields(logrus.Fields{
-		"endpoint": "/users/register",
-		"method":   "POST",
-	}).Info("Creando un nuevo usuario")
+	logger.Log.Info("Creando un nuevo usuario", zap.String("endpoint", ctx.Request.URL.Path), zap.String("method", "POST"))
 
 	ctx.JSON(http.StatusCreated, gin.H{"message": "Usuario registrado correctamente"})
 }
@@ -83,11 +81,7 @@ func (c *UserHandler) Login(ctx *gin.Context) {
 	metrics.HttpRequestsTotal.WithLabelValues("POST", "/users/login").Inc()
 
 	// Crear log personalizado
-	logrus.WithFields(logrus.Fields{
-		"endpoint":   "/users/login",
-		"method":     "POST",
-		"user_email": req.Email,
-	}).Info("Usuario loggeado")
+	logger.Log.Info("Usuario loggeado", zap.String("endpoint", ctx.Request.URL.Path), zap.String("method", "POST"), zap.String("user_email", req.Email))
 
 	fmt.Println(user.Role)
 

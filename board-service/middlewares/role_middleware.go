@@ -5,8 +5,9 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 	"github.com/vadgun/gotrelloclone/board-service/config"
+	"github.com/vadgun/gotrelloclone/board-service/logger"
+	"go.uber.org/zap"
 
 	"slices"
 
@@ -17,10 +18,7 @@ func IsRoleAllowed(allowedRoles ...string) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 
 		// Envia un log del endpoint consultado
-		logrus.WithFields(logrus.Fields{
-			"endpoint": ctx.Request.URL.Path,
-			"ip":       ctx.ClientIP(),
-		}).Info("Verificando rol en board-service")
+		logger.Log.Info("Verificando rol en board-service", zap.String("endpoint", ctx.Request.URL.Path), zap.String("ip", ctx.ClientIP()))
 
 		// 1️⃣ Obtener el header Authorization
 		authHeader := ctx.GetHeader("Authorization")

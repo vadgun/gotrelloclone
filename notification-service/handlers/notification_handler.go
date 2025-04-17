@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/vadgun/gotrelloclone/notification-service/metrics"
 	"github.com/vadgun/gotrelloclone/notification-service/models"
 	"github.com/vadgun/gotrelloclone/notification-service/services"
 )
@@ -26,6 +27,9 @@ func (h *NotificationHandler) SendNotification(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos"})
 		return
 	}
+
+	// Incrementar la métrica cada vez que se llame este endpoint
+	metrics.HttpRequestsTotal.WithLabelValues("POST", "/notify").Inc()
 
 	notification.CreatedAt = time.Now()
 	err := h.service.CreateNotification(ctx, &notification)

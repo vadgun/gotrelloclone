@@ -5,7 +5,6 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 	"github.com/vadgun/gotrelloclone/user-service/handlers"
 	"github.com/vadgun/gotrelloclone/user-service/infra/config"
 	"github.com/vadgun/gotrelloclone/user-service/infra/logger"
@@ -53,6 +52,6 @@ func main() {
 	router.GET("/metrics", gin.WrapH(metrics.MetricsHandler()))
 
 	// Iniciar servidor en el puerto 8080
-	logrus.Info("🚀 user-service corriendo en http://user-service:8080")
+	logger.Log.Info("🚀 user-service corriendo en http://user-service:8080")
 	router.Run(":8080")
 }

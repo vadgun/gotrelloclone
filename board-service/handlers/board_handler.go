@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/vadgun/gotrelloclone/board-service/metrics"
 	"github.com/vadgun/gotrelloclone/board-service/services"
 )
 
@@ -20,6 +21,8 @@ func (h *BoardHandler) CreateBoard(ctx *gin.Context) {
 		Name      string `json:"name" binding:"required"`
 		OwnerName string `json:"owner_name" binding:"required"`
 	}
+
+	metrics.HttpRequestsTotal.WithLabelValues("POST", "/boards").Inc()
 
 	if err := ctx.ShouldBindJSON(&request); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

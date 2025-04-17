@@ -8,7 +8,7 @@ var Log *zap.Logger
 
 func InitLogger() {
 	var err error
-	Log, err = zap.NewDevelopment() // Puedes usar zap.NewDevelopment() en dev || zap.NewProduction en prod
+	Log, err = zap.NewProduction() // Puedes usar zap.NewDevelopment() en dev
 	if err != nil {
 		panic("No se pudo inicializar zap logger: " + err.Error())
 	}

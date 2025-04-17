@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/vadgun/gotrelloclone/task-service/metrics"
 	"github.com/vadgun/gotrelloclone/task-service/models"
 	"github.com/vadgun/gotrelloclone/task-service/services"
 	"go.mongodb.org/mongo-driver/bson"
@@ -31,6 +32,9 @@ func (h *TaskHandler) CreateTask(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos"})
 		return
 	}
+
+	// Incrementar la métrica cada vez que se llame este endpoint
+	metrics.HttpRequestsTotal.WithLabelValues("POST", "/tasks").Inc()
 
 	userID, _ := ctx.Get("userID") // Obtenemos el ID del usuario autenticado
 
