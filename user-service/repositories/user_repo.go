@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
-	"github.com/vadgun/gotrelloclone/user-service/config"
+	"github.com/vadgun/gotrelloclone/user-service/infra/config"
 	"github.com/vadgun/gotrelloclone/user-service/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"

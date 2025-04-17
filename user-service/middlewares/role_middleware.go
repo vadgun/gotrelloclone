@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
-	"github.com/vadgun/gotrelloclone/user-service/config"
+	"github.com/vadgun/gotrelloclone/user-service/infra/config"
 
 	"slices"
 

@@ -8,8 +8,8 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/vadgun/gotrelloclone/user-service/config"
-	"github.com/vadgun/gotrelloclone/user-service/kafka"
+	"github.com/vadgun/gotrelloclone/user-service/infra/config"
+	"github.com/vadgun/gotrelloclone/user-service/infra/kafka"
 	"github.com/vadgun/gotrelloclone/user-service/models"
 	"github.com/vadgun/gotrelloclone/user-service/repositories"
 )

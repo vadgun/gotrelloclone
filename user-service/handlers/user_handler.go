@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
-	"github.com/vadgun/gotrelloclone/user-service/metrics"
+	"github.com/vadgun/gotrelloclone/user-service/infra/metrics"
 	"github.com/vadgun/gotrelloclone/user-service/services"
 )
 
