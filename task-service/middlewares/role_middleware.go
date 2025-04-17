@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/vadgun/gotrelloclone/task-service/config"
-	"github.com/vadgun/gotrelloclone/task-service/logger"
+	"github.com/vadgun/gotrelloclone/task-service/infra/config"
+	"github.com/vadgun/gotrelloclone/task-service/infra/logger"
 	"go.uber.org/zap"
 
 	"slices"

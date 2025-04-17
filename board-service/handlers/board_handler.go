@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/vadgun/gotrelloclone/board-service/logger"
-	"github.com/vadgun/gotrelloclone/board-service/metrics"
+	"github.com/vadgun/gotrelloclone/board-service/infra/logger"
+	"github.com/vadgun/gotrelloclone/board-service/infra/metrics"
 	"github.com/vadgun/gotrelloclone/board-service/services"
 	"go.uber.org/zap"
 )

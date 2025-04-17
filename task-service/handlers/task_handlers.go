@@ -8,8 +8,8 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/vadgun/gotrelloclone/task-service/logger"
-	"github.com/vadgun/gotrelloclone/task-service/metrics"
+	"github.com/vadgun/gotrelloclone/task-service/infra/logger"
+	"github.com/vadgun/gotrelloclone/task-service/infra/metrics"
 	"github.com/vadgun/gotrelloclone/task-service/models"
 	"github.com/vadgun/gotrelloclone/task-service/services"
 	"go.mongodb.org/mongo-driver/bson"

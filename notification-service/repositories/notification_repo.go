@@ -3,7 +3,7 @@ package repositories
 import (
 	"context"
 
-	"github.com/vadgun/gotrelloclone/notification-service/config"
+	"github.com/vadgun/gotrelloclone/notification-service/infra/config"
 	"github.com/vadgun/gotrelloclone/notification-service/models"
 	"go.mongodb.org/mongo-driver/mongo"
 )

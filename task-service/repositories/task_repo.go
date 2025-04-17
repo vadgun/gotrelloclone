@@ -5,7 +5,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/vadgun/gotrelloclone/task-service/config"
+	"github.com/vadgun/gotrelloclone/task-service/infra/config"
 	"github.com/vadgun/gotrelloclone/task-service/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"

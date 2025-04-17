@@ -2,11 +2,11 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/vadgun/gotrelloclone/notification-service/config"
 	"github.com/vadgun/gotrelloclone/notification-service/handlers"
-	"github.com/vadgun/gotrelloclone/notification-service/kafka"
-	"github.com/vadgun/gotrelloclone/notification-service/logger"
-	"github.com/vadgun/gotrelloclone/notification-service/metrics"
+	"github.com/vadgun/gotrelloclone/notification-service/infra/config"
+	"github.com/vadgun/gotrelloclone/notification-service/infra/kafka"
+	"github.com/vadgun/gotrelloclone/notification-service/infra/logger"
+	"github.com/vadgun/gotrelloclone/notification-service/infra/metrics"
 	"github.com/vadgun/gotrelloclone/notification-service/repositories"
 	"github.com/vadgun/gotrelloclone/notification-service/routes"
 	"github.com/vadgun/gotrelloclone/notification-service/services"
