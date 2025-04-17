@@ -49,6 +49,9 @@ func main() {
 	// Configurar rutas
 	routes.SetupTaskRoutes(router, taskHandler)
 
+	// Envolver el manejador de Prometheus/http para rutearlo a gin
+	router.GET("/metrics", gin.WrapH(metrics.MetricsHandler()))
+
 	// Iniciar servidor en el puerto 8082
 	logger.Log.Info("🚀 task-service corriendo en http://task-service:8080")
 	go kafka.StartConsumer()
