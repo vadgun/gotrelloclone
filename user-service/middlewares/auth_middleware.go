@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/sirupsen/logrus"
-	"github.com/vadgun/gotrelloclone/user-service/config"
+	"github.com/vadgun/gotrelloclone/user-service/infra/config"
 )
 
 // AuthMiddleware protege rutas verificando el token JWT.

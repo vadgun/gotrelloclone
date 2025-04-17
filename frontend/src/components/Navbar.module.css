@@ -1,0 +1,45 @@
+.navbar {
+    background-color: #0079bf; /* Color de fondo azul de Trello */
+    color: white;
+    padding: 10px 20px; /* Espacio vertical y horizontal */
+    display: flex;
+    justify-content: space-between; /* Espacio entre el nombre de usuario y el botón */
+    align-items: center; /* Alineación vertical */
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1); /* Sombra sutil en la parte inferior */
+  }
+  
+  .username {
+    font-size: 18px;
+    font-weight: bold;
+  }
+  
+  .logoutButton {
+    background-color: #e2e4e6; /* Fondo claro para el botón */
+    color: #172b4d; /* Texto principal para el botón */
+    border: none;
+    border-radius: 3px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.2s ease;
+  }
+  
+  .logoutButton:hover {
+    background-color: #d4d6d8; /* Ligeramente más oscuro al pasar el ratón */
+  }
+
+  .adminButton {
+  background-color: #007bff; /* Un color distintivo para administración */
+  color: white;
+  border: none;
+  border-radius: 3px;
+  padding: 10px 15px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.2s ease;
+  text-decoration: none; /* Por si acaso hereda estilos de enlace */
+}
+
+.adminButton:hover {
+  background-color: #0056b3;
+}

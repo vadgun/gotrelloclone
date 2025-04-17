@@ -1,5 +1,5 @@
 global:
-  scrape_interval: 15s  # Cada cuánto tiempo recolectar métricas
+  scrape_interval: 1h  # Cada cuánto tiempo recolectar métricas
 
 scrape_configs:
   - job_name: "user-service"

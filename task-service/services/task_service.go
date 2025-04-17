@@ -22,8 +22,8 @@ func (s *TaskService) CreateTask(ctx context.Context, task *models.Task, userID 
 	return s.repo.CreateTask(ctx, task, userID)
 }
 
-func (s *TaskService) GetTasksByBoardID(ctx context.Context, boardID string) ([]models.Task, error) {
-	return s.repo.GetTasksByBoardID(ctx, boardID)
+func (s *TaskService) GetTasksByBoardID(ctx context.Context, boardID string, page, limit int64) ([]models.Task, int64, error) {
+	return s.repo.GetTasksByBoardID(ctx, boardID, page, limit)
 }
 
 func (s *TaskService) GetTaskByID(ctx context.Context, taskID string) (*models.Task, error) {
@@ -72,4 +72,8 @@ func (s *TaskService) BoardExists(ctx context.Context, boardID string) (bool, er
 func (s *TaskService) SendNotification(userID, message, topic, key string) error {
 	err := kafka.ProduceMessage(userID, message, topic, key)
 	return err
+}
+
+func (s *TaskService) GetAllTasks() ([]models.Task, error) {
+	return s.repo.GetAllTasks()
 }

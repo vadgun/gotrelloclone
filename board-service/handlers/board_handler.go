@@ -17,7 +17,8 @@ func NewBoardHandler(service *services.BoardService) *BoardHandler {
 
 func (h *BoardHandler) CreateBoard(ctx *gin.Context) {
 	var request struct {
-		Name string `json:"name" binding:"required"`
+		Name      string `json:"name" binding:"required"`
+		OwnerName string `json:"owner_name" binding:"required"`
 	}
 
 	if err := ctx.ShouldBindJSON(&request); err != nil {
@@ -27,7 +28,7 @@ func (h *BoardHandler) CreateBoard(ctx *gin.Context) {
 
 	userID, _ := ctx.Get("userID") // Obtenemos el ID del usuario autenticado
 
-	board, err := h.service.CreateBoard(request.Name, userID.(string))
+	board, err := h.service.CreateBoard(request.Name, userID.(string), request.OwnerName)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudo crear el tablero"})
 		return
@@ -57,4 +58,44 @@ func (h *BoardHandler) GetBoardByID(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, tasks)
+}
+
+func (h *BoardHandler) DeleteBoardByID(ctx *gin.Context) {
+	boardID := ctx.Param("boardID")
+	err := h.service.DeleteBoardByID(boardID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudo eliminar el tablero"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, "")
+}
+
+func (h *BoardHandler) UpdateBoardByID(ctx *gin.Context) {
+	boardID := ctx.Param("boardID")
+	var request struct {
+		Name string `json:"name" binding:"required"`
+	}
+
+	if err := ctx.ShouldBindJSON(&request); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err := h.service.UpdateBoardByID(boardID, request.Name)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudo actualizar el tablero"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, "")
+}
+
+func (h *BoardHandler) GetAllBoards(ctx *gin.Context) {
+	boards, err := h.service.GetAllBoards()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudieron obtener los boards"})
+		return
+	}
+	ctx.JSON(http.StatusOK, boards)
 }

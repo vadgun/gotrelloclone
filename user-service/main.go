@@ -1,12 +1,15 @@
 package main
 
 import (
+	"time"
+
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
-	"github.com/vadgun/gotrelloclone/user-service/config"
 	"github.com/vadgun/gotrelloclone/user-service/handlers"
-	"github.com/vadgun/gotrelloclone/user-service/logger"
-	"github.com/vadgun/gotrelloclone/user-service/metrics"
+	"github.com/vadgun/gotrelloclone/user-service/infra/config"
+	"github.com/vadgun/gotrelloclone/user-service/infra/logger"
+	"github.com/vadgun/gotrelloclone/user-service/infra/metrics"
 	"github.com/vadgun/gotrelloclone/user-service/repositories"
 	"github.com/vadgun/gotrelloclone/user-service/routes"
 	"github.com/vadgun/gotrelloclone/user-service/services"
@@ -32,6 +35,16 @@ func main() {
 
 	// Configurar router Gin
 	router := gin.Default()
+
+	// Acivando CORS en default
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:5173"},
+		AllowMethods:     []string{"POST", "OPTIONS", "GET", "PUT", "PATCH", "DELETE"},
+		AllowHeaders:     []string{"Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 
 	// Configurar rutas
 	routes.SetupUserRoutes(router, userHandler)

@@ -2,7 +2,10 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
+	"math"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/vadgun/gotrelloclone/task-service/models"
@@ -22,7 +25,9 @@ func NewTaskHandler(service *services.TaskService) *TaskHandler {
 // 1️⃣ Crear tarea
 func (h *TaskHandler) CreateTask(ctx *gin.Context) {
 	var task models.Task
+	fmt.Println("WTF!")
 	if err := ctx.ShouldBindJSON(&task); err != nil {
+		fmt.Println("Datos inválidos")
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos"})
 		return
 	}
@@ -32,16 +37,19 @@ func (h *TaskHandler) CreateTask(ctx *gin.Context) {
 	// 📌 Validar si el BoardID existe antes de crear la tarea
 	boardExists, err := h.service.BoardExists(ctx, task.BoardID)
 	if err != nil {
+		fmt.Println("Error al validar el BoardID")
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error al validar el BoardID"})
 		return
 	}
 	if !boardExists {
+		fmt.Println("El Board no existe")
 		ctx.JSON(http.StatusNotFound, gin.H{"error": "El Board no existe"})
 		return
 	}
 
 	id, err := h.service.CreateTask(ctx, &task, userID.(string))
 	if err != nil {
+		fmt.Println("No se pudo crear la tarea")
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudo crear la tarea"})
 		return
 	}
@@ -62,6 +70,7 @@ func (h *TaskHandler) CreateTask(ctx *gin.Context) {
 
 	err = h.service.SendNotification(userID.(string), string(taskJSON), "task-events", "new-task")
 	if err != nil {
+		fmt.Println("Error enviando evento a Kafka")
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error enviando evento a Kafka"})
 		return
 	}
@@ -71,19 +80,37 @@ func (h *TaskHandler) CreateTask(ctx *gin.Context) {
 
 	// Publicar evento en Kafka
 	// err = kafka.ProduceMessage("task-events", "new-task", string(taskJSON))
-	ctx.JSON(http.StatusCreated, gin.H{"message": "Tarea creada y notificacion enviada exitosamente", "task": &task})
+	ctx.JSON(http.StatusCreated, gin.H{"message": "La tarea ha sido creada", "task": &task})
 }
 
 // 2️⃣ Obtener todas las tareas de un board
 func (h *TaskHandler) GetTasksByBoardID(ctx *gin.Context) {
 	boardID := ctx.Param("boardID")
-	tasks, err := h.service.GetTasksByBoardID(ctx, boardID)
+	pageStr := ctx.Query("page")
+	limitStr := ctx.Query("limit")
+
+	page, _ := strconv.ParseInt(pageStr, 10, 64)
+	limit, _ := strconv.ParseInt(limitStr, 10, 64)
+
+	if page < 1 {
+		page = 1
+	}
+	if limit < 1 {
+		limit = 10
+	}
+
+	tasks, total, err := h.service.GetTasksByBoardID(ctx, boardID, page, limit)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudieron obtener las tareas"})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, tasks)
+	ctx.JSON(http.StatusOK, gin.H{
+		"tasks":      tasks,
+		"total":      total,
+		"page":       page,
+		"totalPages": int(math.Ceil(float64(total) / float64(limit))),
+	})
 }
 
 // 3️⃣ Obtener una tarea específica
@@ -238,4 +265,14 @@ func (h *TaskHandler) UpdateTaskStatus(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"message": "Estado de la tarea y notificacion enviada a kafka con éxito"})
+}
+
+func (h *TaskHandler) GetAllUsers(ctx *gin.Context) {
+	tasks, err := h.service.GetAllTasks()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudieron obtener las Tareas"})
+		return
+	}
+	ctx.JSON(http.StatusOK, tasks)
+
 }

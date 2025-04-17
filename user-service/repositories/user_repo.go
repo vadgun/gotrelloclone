@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
-	"github.com/vadgun/gotrelloclone/user-service/config"
+	"github.com/vadgun/gotrelloclone/user-service/infra/config"
 	"github.com/vadgun/gotrelloclone/user-service/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -72,4 +72,28 @@ func (r *UserRepository) GetUserByID(userID string) (*models.User, error) {
 	}
 
 	return &user, nil
+}
+
+// GetAllUsers busca todos los usuarios en la base de datos
+func (r *UserRepository) GetAllUsers() ([]models.User, error) {
+	var users []models.User
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	cursor, err := r.collection.Find(ctx, bson.M{})
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	for cursor.Next(ctx) {
+		var user models.User
+		if err := cursor.Decode(&user); err != nil {
+			return nil, err
+		}
+		users = append(users, user)
+	}
+
+	return users, nil
 }

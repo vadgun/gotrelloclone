@@ -1,11 +1,12 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
-	"github.com/vadgun/gotrelloclone/user-service/metrics"
+	"github.com/vadgun/gotrelloclone/user-service/infra/metrics"
 	"github.com/vadgun/gotrelloclone/user-service/services"
 )
 
@@ -26,6 +27,7 @@ func (c *UserHandler) Register(ctx *gin.Context) {
 		Email    string `json:"email" binding:"required,email"`
 		Password string `json:"password" binding:"required,min=6"`
 		Phone    string `json:"phone" binding:"required,min=10"`
+		Role     string `json:"role"`
 	}
 
 	// Validar la entrada
@@ -34,8 +36,12 @@ func (c *UserHandler) Register(ctx *gin.Context) {
 		return
 	}
 
+	if req.Role != "" {
+		req.Role = "member"
+	}
+
 	// Registrar usuario
-	err := c.service.RegisterUser(req.Name, req.Email, req.Password, req.Phone)
+	err := c.service.RegisterUser(req.Name, req.Email, req.Password, req.Phone, req.Role)
 	if err != nil {
 		ctx.JSON(http.StatusConflict, gin.H{"error": err.Error()})
 		return
@@ -67,7 +73,7 @@ func (c *UserHandler) Login(ctx *gin.Context) {
 	}
 
 	// Autenticar usuario y generar token
-	token, err := c.service.LoginUser(req.Email, req.Password)
+	token, user, err := c.service.LoginUser(req.Email, req.Password)
 	if err != nil {
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
@@ -83,7 +89,9 @@ func (c *UserHandler) Login(ctx *gin.Context) {
 		"user_email": req.Email,
 	}).Info("Usuario loggeado")
 
-	ctx.JSON(http.StatusOK, gin.H{"token": token})
+	fmt.Println(user.Role)
+
+	ctx.JSON(http.StatusOK, gin.H{"token": token, "user": user.Name, "role": user.Role})
 }
 
 // Profile devuelve la información del usuario autenticado.
@@ -113,4 +121,13 @@ func (c *UserHandler) GetUserByID(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, user)
+}
+
+func (c *UserHandler) GetAllUsers(ctx *gin.Context) {
+	users, err := c.service.GetAllUsers()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error al obtener usuarios"})
+		return
+	}
+	ctx.JSON(http.StatusOK, users)
 }

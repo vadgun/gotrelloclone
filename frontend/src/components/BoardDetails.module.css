@@ -1,0 +1,378 @@
+.container {
+  padding: 20px;
+  background-color: #f4f5f7;
+}
+
+.header {
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header h3 {
+  font-size: 18px;
+  color: #5e6c84;
+}
+
+.backButton {
+  background-color: #e2e4e6;
+  color: #172b4d;
+  border: none;
+  border-radius: 3px;
+  padding: 10px 15px;
+  cursor: pointer;
+  font-size: 17px;
+  transition: background-color 0.2s ease;
+}
+
+.backButton:hover {
+  background-color: #d4d6d8;
+}
+
+.addTaskForm {
+  display: flex;
+  margin-bottom: 20px;
+  gap: 10px;
+}
+
+.taskInput {
+  padding: 10px;
+  border: none;
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 2px #0079bf;
+  font-size: 16px;
+  flex-grow: 1;
+}
+
+.taskInput:focus {
+  outline: none;
+}
+
+.addTaskButton {
+  background-color: #5aac44;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  padding: 10px 15px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.2s ease;
+}
+
+.addTaskButton:hover {
+  background-color: #61bd4f;
+}
+
+.tasksList {
+  list-style: none;
+  padding: 0;
+}
+
+.logoutButton {
+  background-color: #f44336;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  padding: 10px 15px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 20px;
+  transition: background-color 0.2s ease;
+}
+
+.logoutButton:hover {
+  background-color: #d32f2f;
+}
+
+.noTasks {
+  color: #5e6c84;
+  font-style: italic;
+  margin-top: 10px;
+}
+
+/* Modal Css */
+
+.editButton {
+  position: absolute;
+  /* margin-left: 10px; */
+  right: 10px;
+  top: 25%;
+  /* Lo coloca a la mitad */
+  transform: translateY(-50%);
+  /* Lo centra verticalmente */
+  background-color: transparent;
+  color: green;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+}
+
+.editButton:hover {
+  color: darkgreen;
+}
+
+.deleteButton {
+  position: absolute;
+  /* margin-left: 10px; */
+  right: 10px;
+  top: 75%;
+  /* Lo coloca a la mitad */
+  transform: translateY(-50%);
+  /* Lo centra verticalmente */
+  background-color: transparent;
+  color: red;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+}
+
+.deleteButton:hover {
+  color: darkred;
+}
+
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  /* Fondo oscuro semitransparente */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  /* Asegura que esté por encima de otros elementos */
+}
+
+.modal {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  padding: 20px;
+  width: 90%;
+  max-width: 400px;
+}
+
+.modal h3 {
+  font-size: 18px;
+  color: #172b4d;
+  margin-bottom: 15px;
+}
+
+.editInput {
+  width: calc(100% - 20px);
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  font-size: 16px;
+  margin-bottom: 15px;
+  box-shadow: inset 0 0 0 2px #0079bf;
+}
+
+.editInput:focus {
+  outline: none;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.saveButton {
+  background-color: #5aac44;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  padding: 10px 15px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.2s ease;
+}
+
+.saveButton:hover {
+  background-color: #61bd4f;
+}
+
+.cancelButton {
+  background-color: #e2e4e6;
+  color: #172b4d;
+  border: none;
+  border-radius: 3px;
+  padding: 10px 15px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.2s ease;
+}
+
+.cancelButton:hover {
+  background-color: #d4d6d8;
+}
+
+.editTextarea {
+  width: calc(100% - 20px);
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  font-size: 16px;
+  margin-bottom: 15px;
+  box-shadow: inset 0 0 0 2px #0079bf;
+  min-height: 80px;
+  /* Puedes ajustar la altura mínima según necesites */
+}
+
+.editTextarea:focus {
+  outline: none;
+}
+
+.tasksList {
+  list-style: none;
+  padding: 0;
+}
+
+.taskItem {
+  position: relative;
+  background-color: #fff;
+  border-radius: 3px;
+  box-shadow: 0 1px 0 rgba(9, 30, 66, 0.25);
+  padding: 10px;
+  margin-bottom: 10px;
+  display: flex;
+  /* Para alinear la información y las acciones */
+  justify-content: space-between;
+  align-items: center;
+  font-size: 16px;
+  color: #172b4d;
+}
+
+.taskInfo {
+  flex-grow: 1;
+  /* Ocupa el espacio restante */
+}
+
+.taskTitle {
+  margin-bottom: 5px;
+  font-size: 1.1rem;
+}
+
+.taskDescription {
+  color: #5e6c84;
+  margin-bottom: 5px;
+  font-size: 0.9rem;
+}
+
+.taskStatus {
+  font-weight: bold;
+  font-size: 0.9rem;
+  color: #0079bf;
+  /* Un color distintivo para el estado */
+}
+
+.taskActions {
+  display: flex;
+  gap: 5px;
+}
+
+.checkbox {
+  margin-right: 10px;
+  transform: scale(1.3);
+  cursor: pointer;
+}
+
+.taskCompleted {
+  text-decoration: line-through;
+  color: #999;
+}
+
+.searchInput {
+  width: calc(100% - 20px);
+  /* Ocupa el ancho completo menos el padding */
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  font-size: 16px;
+  margin-bottom: 20px;
+  /* Espacio debajo del input de búsqueda */
+  box-shadow: inset 0 0 0 2px #0079bf;
+  /* Borde azul al enfocar */
+}
+
+.searchInput:focus {
+  outline: none;
+}
+
+.statusSelect {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  font-size: 16px;
+  margin-bottom: 20px;
+  /* Espacio debajo del select */
+  width: 100%;
+  /* Ancho fijo para el select (ajusta según necesites) */
+  -webkit-appearance: none;
+  /* Elimina los estilos predeterminados de Chrome/Safari */
+  -moz-appearance: none;
+  /* Elimina los estilos predeterminados de Firefox */
+  appearance: none;
+  /* Elimina los estilos predeterminados de otros navegadores */
+  background-image: url('data:image/svg+xml;utf8,<svg fill="currentColor" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>');
+  /* Icono de flecha hacia abajo */
+  background-repeat: no-repeat;
+  background-position-x: 95%;
+  background-position-y: 50%;
+  cursor: pointer;
+}
+
+.statusSelect:focus {
+  outline: none;
+  border-color: #0079bf;
+  /* Cambia el color del borde al enfocar */
+  box-shadow: 0 0 0 0.2em rgba(0, 121, 191, 0.25);
+  /* Añade una sombra de enfoque */
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  /* Centra los elementos horizontalmente */
+  align-items: center;
+  /* Centra los elementos verticalmente (opcional, pero útil para la alineación) */
+  margin-top: 20px;
+  /* Espacio superior para separarlo de la lista de tareas */
+  gap: 10px;
+  /* Espacio entre los botones y el texto de la página */
+}
+
+.pagination button {
+  background-color: #e2e4e6;
+  /* Fondo similar a los botones secundarios de Trello */
+  color: #172b4d;
+  /* Color del texto principal de Trello */
+  border: none;
+  border-radius: 3px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
+}
+
+.pagination button:hover:enabled {
+  background-color: #d4d6d8;
+}
+
+.pagination button:disabled {
+  background-color: #f4f5f7;
+  /* Fondo más claro para botones deshabilitados */
+  color: #5e6c84;
+  /* Color de texto más claro para botones deshabilitados */
+  cursor: not-allowed;
+}
+
+.pagination span {
+  font-size: 14px;
+  color: #5e6c84;
+}

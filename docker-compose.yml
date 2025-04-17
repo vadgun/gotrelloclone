@@ -78,9 +78,9 @@ services:
       - app-network
       - kafka-network
     depends_on:
-      mongo-board:
+      kafka-exporter:
         condition: service_started
-      task-service:
+      mongo-board:
         condition: service_started
       kafka: 
         condition: service_healthy
@@ -92,10 +92,14 @@ services:
     env_file:
       - ./task-service/.env
     depends_on:
+      kafka-exporter:
+        condition: service_started
       mongo-task:
         condition: service_started
       kafka: 
         condition: service_healthy
+      board-service:
+        condition: service_started
     networks:
       - app-network
       - kafka-network
@@ -115,6 +119,8 @@ services:
       - app-network
       - kafka-network
     depends_on:
+      kafka-exporter:
+        condition: service_started
       mongo-user:
         condition: service_started
       kafka: 
@@ -130,12 +136,16 @@ services:
       - app-network
       - kafka-network
     depends_on:
-      user-service:
-        condition: service_started
+      kafka-exporter:
+        condition: service_started 
       mongo-notification:
         condition: service_started
       kafka: 
         condition: service_healthy
+      user-service:
+        condition: service_started
+      task-service:
+        condition: service_started
 
   mongo-board:
     image: mongo
