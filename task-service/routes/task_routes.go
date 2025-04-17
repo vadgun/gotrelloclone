@@ -19,4 +19,9 @@ func SetupTaskRoutes(router *gin.Engine, taskHandler *handlers.TaskHandler) {
 	taskGroup.PUT("/:taskID/status", taskHandler.UpdateTaskStatus)  // Cambia el estado de una tarea - Implementar producer
 	taskGroup.DELETE("/:taskID", taskHandler.DeleteTask)            // Eliminar tarea - Implementar producer
 
+	adminGroup := router.Group("/admin")
+	{
+		adminGroup.GET("/tasks", middlewares.IsRoleAllowed("admin"), taskHandler.GetAllUsers)
+	}
+
 }

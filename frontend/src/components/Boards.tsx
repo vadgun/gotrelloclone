@@ -17,6 +17,7 @@ function Boards() {
   const [boards, setBoards] = useState<Board[]>([]);
   const [boardName, setBoardName] = useState("");
   const token = localStorage.getItem("token");
+  const userName = localStorage.getItem("username");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editBoard, setEditBoard] = useState<Board | null>(null);
   const [editName, setEditName] = useState("");
@@ -30,7 +31,7 @@ function Boards() {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ name: boardName }),
+      body: JSON.stringify({ name: boardName, owner_name: userName }),
     });
 
     if (response.ok) {

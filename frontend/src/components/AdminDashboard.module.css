@@ -46,3 +46,47 @@
 .table tbody tr:nth-child(even) {
   background-color: #f9f9f9; /* Fondo ligeramente diferente para filas pares */
 }
+
+.adminPanel { /* Contenedor principal del panel de administración si no lo tienes */
+  padding: 20px;
+  background-color: #f4f5f7;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.adminPanel h1 {
+  color: #172b4d;
+  margin-bottom: 20px;
+  font-size: 28px;
+}
+
+.adminPanel section {
+  background-color: #fff;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  padding: 15px;
+}
+
+.adminPanel section h2 {
+  color: #172b4d;
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 20px;
+  border-bottom: 1px solid #e2e4e6;
+  padding-bottom: 5px;
+}
+
+.adminPanel section ul {
+  list-style: none;
+  padding: 0;
+}
+
+.adminPanel section ul li {
+  padding: 8px 0;
+  border-bottom: 1px solid #e2e4e6;
+}
+
+.adminPanel section ul li:last-child {
+  border-bottom: none;
+}

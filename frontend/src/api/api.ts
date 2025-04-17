@@ -89,3 +89,24 @@ export const getTasks = async ({
     totalPages: data.totalPages || 1,
   };
 };
+
+export const getAdminUsers = async (token: string) => {
+  const res = await fetch(`${USER_API_URL}/admin/users`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return res.json();
+};
+
+export const getAdminBoards = async (token: string) => {
+  const res = await fetch(`${BOARD_API_URL}/admin/boards`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return res.json();
+};
+
+export const getAdminTasks = async (token: string) => {
+  const res = await fetch(`${TASK_API_URL}/admin/tasks`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return res.json();
+};

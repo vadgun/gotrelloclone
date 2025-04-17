@@ -73,3 +73,7 @@ func (s *TaskService) SendNotification(userID, message, topic, key string) error
 	err := kafka.ProduceMessage(userID, message, topic, key)
 	return err
 }
+
+func (s *TaskService) GetAllTasks() ([]models.Task, error) {
+	return s.repo.GetAllTasks()
+}

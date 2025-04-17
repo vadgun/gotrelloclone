@@ -48,6 +48,7 @@ const Navbar = ({ userName, role, setUserName, setRole, handleLogout }: NavbarPr
     <nav className={styles.navbar}>
       <div className={styles.username}>Hola, {userName}</div>
       {isAdmin && (<button onClick={() => navigate("/admin")} className={styles.adminButton}>Administración</button>)}
+      {isAdmin && (<button onClick={() => navigate("/boards")} className={styles.logoutButton}>Boards</button>)}
       <button className={styles.logoutButton} onClick={onLogoutClick}>
         Cerrar sesión
       </button>

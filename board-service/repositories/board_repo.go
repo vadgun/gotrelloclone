@@ -112,3 +112,26 @@ func (r *BoardRepository) UpdateBoardByID(boardID string, newBoardName string) e
 
 	return nil
 }
+
+func (r *BoardRepository) GetAllBoards() ([]models.Board, error) {
+	var boards []models.Board
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	cursor, err := r.collection.Find(context.TODO(), bson.M{})
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	for cursor.Next(ctx) {
+		var board models.Board
+		if err := cursor.Decode(&board); err != nil {
+			return nil, err
+		}
+		boards = append(boards, board)
+	}
+
+	return boards, nil
+}

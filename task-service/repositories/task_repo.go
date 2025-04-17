@@ -208,3 +208,27 @@ func (r *TaskRepository) GetBoardByID(id string) (*models.Board, error) {
 	}
 	return &board, nil
 }
+
+// Obtiene todas las tareas disponibles para el
+func (r *TaskRepository) GetAllTasks() ([]models.Task, error) {
+	var tasks []models.Task
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	cursor, err := r.collection.Find(context.TODO(), bson.M{})
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	for cursor.Next(ctx) {
+		var task models.Task
+		if err := cursor.Decode(&task); err != nil {
+			return nil, err
+		}
+		tasks = append(tasks, task)
+	}
+
+	return tasks, nil
+}

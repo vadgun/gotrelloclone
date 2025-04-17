@@ -266,3 +266,13 @@ func (h *TaskHandler) UpdateTaskStatus(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, gin.H{"message": "Estado de la tarea y notificacion enviada a kafka con éxito"})
 }
+
+func (h *TaskHandler) GetAllUsers(ctx *gin.Context) {
+	tasks, err := h.service.GetAllTasks()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudieron obtener las Tareas"})
+		return
+	}
+	ctx.JSON(http.StatusOK, tasks)
+
+}

@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
-	"github.com/vadgun/gotrelloclone/user-service/config"
+	"github.com/vadgun/gotrelloclone/task-service/config"
 
 	"slices"
 
@@ -20,7 +20,7 @@ func IsRoleAllowed(allowedRoles ...string) gin.HandlerFunc {
 		logrus.WithFields(logrus.Fields{
 			"endpoint": ctx.Request.URL.Path,
 			"ip":       ctx.ClientIP(),
-		}).Info("Verificando rol en user-service")
+		}).Info("Verificando rol en board-service")
 
 		// 1️⃣ Obtener el header Authorization
 		authHeader := ctx.GetHeader("Authorization")

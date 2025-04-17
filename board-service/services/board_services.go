@@ -18,10 +18,11 @@ func NewBoardService(repo *repositories.BoardRepository) *BoardService {
 	return &BoardService{repo}
 }
 
-func (s *BoardService) CreateBoard(name, ownerID string) (*models.Board, error) {
+func (s *BoardService) CreateBoard(name, ownerID, ownerName string) (*models.Board, error) {
 	board := &models.Board{
 		Name:      name,
 		OwnerID:   ownerID,
+		OwnerName: ownerName,
 		CreatedAt: time.Now(),
 	}
 
@@ -66,4 +67,8 @@ func (s *BoardService) DeleteBoardByID(boardID string) error {
 
 func (s *BoardService) UpdateBoardByID(boardID, newBoardName string) error {
 	return s.repo.UpdateBoardByID(boardID, newBoardName)
+}
+
+func (s *BoardService) GetAllBoards() ([]models.Board, error) {
+	return s.repo.GetAllBoards()
 }

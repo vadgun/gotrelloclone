@@ -78,13 +78,16 @@ func (r *UserRepository) GetUserByID(userID string) (*models.User, error) {
 func (r *UserRepository) GetAllUsers() ([]models.User, error) {
 	var users []models.User
 
-	cursor, err := r.collection.Find(context.TODO(), bson.M{})
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	cursor, err := r.collection.Find(ctx, bson.M{})
 	if err != nil {
 		return nil, err
 	}
-	defer cursor.Close(context.TODO())
+	defer cursor.Close(ctx)
 
-	for cursor.Next(context.TODO()) {
+	for cursor.Next(ctx) {
 		var user models.User
 		if err := cursor.Decode(&user); err != nil {
 			return nil, err
