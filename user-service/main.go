@@ -49,6 +49,7 @@ func main() {
 	routes.SetupUserRoutes(router, userHandler)
 
 	// Envolver el manejador de Prometheus/http para rutearlo a gin
+	router.Use(metrics.MetricsMiddleware())
 	router.GET("/metrics", gin.WrapH(metrics.MetricsHandler()))
 
 	// Iniciar servidor en el puerto 8080

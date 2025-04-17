@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -48,8 +47,8 @@ func (c *UserHandler) Register(ctx *gin.Context) {
 		return
 	}
 
-	// Incrementar la métrica cada vez que se llame este endpoint
-	metrics.HttpRequestsTotal.WithLabelValues("POST", "/users/register").Inc()
+	// Metrica que lleva el numero de usuarios registrados
+	metrics.UsersCreated.Inc()
 
 	// Crear log personalizado
 	logger.Log.Info("Creando un nuevo usuario", zap.String("endpoint", ctx.Request.URL.Path), zap.String("method", "POST"))
@@ -73,17 +72,14 @@ func (c *UserHandler) Login(ctx *gin.Context) {
 	// Autenticar usuario y generar token
 	token, user, err := c.service.LoginUser(req.Email, req.Password)
 	if err != nil {
+		metrics.LoginAttempts.WithLabelValues("fail").Inc()
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
-
-	// Incrementar la métrica cada vez que se llame este endpoint
-	metrics.HttpRequestsTotal.WithLabelValues("POST", "/users/login").Inc()
+	metrics.LoginAttempts.WithLabelValues("success").Inc()
 
 	// Crear log personalizado
 	logger.Log.Info("Usuario loggeado", zap.String("endpoint", ctx.Request.URL.Path), zap.String("method", "POST"), zap.String("user_email", req.Email))
-
-	fmt.Println(user.Role)
 
 	ctx.JSON(http.StatusOK, gin.H{"token": token, "user": user.Name, "role": user.Role})
 }
