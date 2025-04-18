@@ -36,7 +36,8 @@ func (c *UserHandler) Register(ctx *gin.Context) {
 		return
 	}
 
-	if req.Role != "" {
+	// Rol por defecto
+	if req.Role == "" {
 		req.Role = "member"
 	}
 
