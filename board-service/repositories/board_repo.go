@@ -5,7 +5,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/vadgun/gotrelloclone/board-service/config"
+	"github.com/vadgun/gotrelloclone/board-service/infra/config"
 	"github.com/vadgun/gotrelloclone/board-service/models"
 
 	"go.mongodb.org/mongo-driver/bson"

@@ -5,12 +5,13 @@ import (
 	"errors"
 	"time"
 
-	"github.com/sirupsen/logrus"
 	"github.com/vadgun/gotrelloclone/user-service/infra/config"
+	"github.com/vadgun/gotrelloclone/user-service/infra/logger"
 	"github.com/vadgun/gotrelloclone/user-service/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.uber.org/zap"
 )
 
 // UserRepository maneja las operaciones con MongoDB.
@@ -33,9 +34,9 @@ func (r *UserRepository) CreateUser(user *models.User) (string, error) {
 	user.CreatedAt = time.Now()
 	mongoResult, err := r.collection.InsertOne(ctx, user)
 	id := mongoResult.InsertedID.(primitive.ObjectID).Hex()
-	logrus.WithFields(logrus.Fields{
-		"user_id": id,
-	}).Info("Guardando usuario en la base de datos")
+
+	logger.Log.Info("Guardando usuario en la base de datos", zap.String("user_id", id))
+
 	return id, err
 }
 

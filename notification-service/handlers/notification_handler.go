@@ -7,8 +7,11 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/vadgun/gotrelloclone/notification-service/infra/logger"
+	"github.com/vadgun/gotrelloclone/notification-service/infra/metrics"
 	"github.com/vadgun/gotrelloclone/notification-service/models"
 	"github.com/vadgun/gotrelloclone/notification-service/services"
+	"go.uber.org/zap"
 )
 
 type NotificationHandler struct {
@@ -27,6 +30,9 @@ func (h *NotificationHandler) SendNotification(ctx *gin.Context) {
 		return
 	}
 
+	// Incrementar la métrica cada vez que se llame este endpoint
+	metrics.HttpRequestsTotal.WithLabelValues("POST", "/notify").Inc()
+
 	notification.CreatedAt = time.Now()
 	err := h.service.CreateNotification(ctx, &notification)
 	if err != nil {
@@ -36,6 +42,9 @@ func (h *NotificationHandler) SendNotification(ctx *gin.Context) {
 
 	// Enviar notificación a WebSocket service
 	h.service.SendNotificationWebSocket(notification.Message)
+
+	// Creando un log personalizado cuando se crea una notificacion
+	logger.Log.Info("Creando Notificacion", zap.String("endpoint", ctx.Request.URL.Path), zap.String("ip", ctx.ClientIP()))
 
 	ctx.JSON(http.StatusOK, gin.H{"message": "Notificación enviada"})
 }

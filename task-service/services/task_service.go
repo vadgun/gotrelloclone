@@ -3,7 +3,7 @@ package services
 import (
 	"context"
 
-	"github.com/vadgun/gotrelloclone/task-service/kafka"
+	"github.com/vadgun/gotrelloclone/task-service/infra/kafka"
 	"github.com/vadgun/gotrelloclone/task-service/models"
 	"github.com/vadgun/gotrelloclone/task-service/repositories"
 

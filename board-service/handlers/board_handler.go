@@ -4,7 +4,10 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/vadgun/gotrelloclone/board-service/infra/logger"
+	"github.com/vadgun/gotrelloclone/board-service/infra/metrics"
 	"github.com/vadgun/gotrelloclone/board-service/services"
+	"go.uber.org/zap"
 )
 
 type BoardHandler struct {
@@ -21,6 +24,8 @@ func (h *BoardHandler) CreateBoard(ctx *gin.Context) {
 		OwnerName string `json:"owner_name" binding:"required"`
 	}
 
+	metrics.HttpRequestsTotal.WithLabelValues("POST", "/boards").Inc()
+
 	if err := ctx.ShouldBindJSON(&request); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -33,6 +38,8 @@ func (h *BoardHandler) CreateBoard(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudo crear el tablero"})
 		return
 	}
+
+	logger.Log.Info("Creando Tablero", zap.String("endpoint", ctx.Request.URL.Path), zap.String("ip", ctx.ClientIP()))
 
 	ctx.JSON(http.StatusCreated, gin.H{"board": board})
 }

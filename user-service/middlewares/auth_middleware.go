@@ -6,18 +6,16 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/sirupsen/logrus"
 	"github.com/vadgun/gotrelloclone/user-service/infra/config"
+	"github.com/vadgun/gotrelloclone/user-service/infra/logger"
+	"go.uber.org/zap"
 )
 
 // AuthMiddleware protege rutas verificando el token JWT.
 func AuthMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 
-		logrus.WithFields(logrus.Fields{
-			"endpoint": ctx.Request.URL.Path,
-			"ip":       ctx.ClientIP(),
-		}).Info("Verificando autenticación")
+		logger.Log.Info("Verificando Token", zap.String("endpoint", ctx.Request.URL.Path), zap.String("ip", ctx.ClientIP()))
 
 		// Obtener el header Authorization
 		authHeader := ctx.GetHeader("Authorization")

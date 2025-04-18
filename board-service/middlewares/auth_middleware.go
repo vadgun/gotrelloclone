@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/vadgun/gotrelloclone/board-service/config"
+	"github.com/vadgun/gotrelloclone/board-service/infra/config"
 )
 
 // var secretKey = []byte("tu_secreto_super_seguro")

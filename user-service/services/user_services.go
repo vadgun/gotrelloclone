@@ -58,13 +58,7 @@ func (s *UserService) RegisterUser(name, email, password, phone, role string) er
 	}
 
 	jsonID, _ := json.Marshal(kafkaUser)
-
 	go kafka.ProduceMessage("", string(jsonID), "user-events", "new-user")
-
-	// Crear log personalizado
-	// logrus.WithFields(logrus.Fields{
-	// 	"user_email": user.Email,
-	// }).Info("Creando usuario en la capa de servicio")
 
 	return nil
 }

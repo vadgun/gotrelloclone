@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/vadgun/gotrelloclone/board-service/kafka"
+	"github.com/vadgun/gotrelloclone/board-service/infra/kafka"
 	"github.com/vadgun/gotrelloclone/board-service/models"
 	"github.com/vadgun/gotrelloclone/board-service/repositories"
 	"go.mongodb.org/mongo-driver/bson/primitive"

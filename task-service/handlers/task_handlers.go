@@ -8,10 +8,13 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/vadgun/gotrelloclone/task-service/infra/logger"
+	"github.com/vadgun/gotrelloclone/task-service/infra/metrics"
 	"github.com/vadgun/gotrelloclone/task-service/models"
 	"github.com/vadgun/gotrelloclone/task-service/services"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.uber.org/zap"
 )
 
 type TaskHandler struct {
@@ -31,6 +34,9 @@ func (h *TaskHandler) CreateTask(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos"})
 		return
 	}
+
+	// Incrementar la métrica cada vez que se llame este endpoint
+	metrics.HttpRequestsTotal.WithLabelValues("POST", "/tasks").Inc()
 
 	userID, _ := ctx.Get("userID") // Obtenemos el ID del usuario autenticado
 
@@ -53,17 +59,7 @@ func (h *TaskHandler) CreateTask(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudo crear la tarea"})
 		return
 	}
-	// Usar h.service para seguir usando la arquitectura limpia RETO
-	// 1ro intentar llegar a la funcion SendNotification enviando
-	// valores o mensajes como la tarea en si, la cual viajara como un
-	// record que contendra un string de toda la cadena en formato JSON
-	// es nuestro caso, esto nos ayudara a capturar el evento(Tarea)
-	// y guardarlo en nuestra base de datos.
-	//
-	// Para hacer que nuestros datos viajen a nuestro productor declarado
-	// en nuestro h.service podemos pasarla a SendNotification varios datos
-	// Topic , event-key , mensaje(tarea) para que sea consumido por
-	// el consumer que esta escuchando en nuestro notification-service.
+
 	// Convertir la tarea a JSON
 	task.ID = id.(primitive.ObjectID)
 	taskJSON, _ := json.Marshal(task)
@@ -75,11 +71,9 @@ func (h *TaskHandler) CreateTask(ctx *gin.Context) {
 		return
 	}
 
-	// // Convertir la tarea a JSON
-	// taskJSON, _ := json.Marshal(task)
+	// Creando un log personalizado
+	logger.Log.Info("Creando Tarea", zap.String("endpoint", ctx.Request.URL.Path), zap.String("ip", ctx.ClientIP()))
 
-	// Publicar evento en Kafka
-	// err = kafka.ProduceMessage("task-events", "new-task", string(taskJSON))
 	ctx.JSON(http.StatusCreated, gin.H{"message": "La tarea ha sido creada", "task": &task})
 }
 

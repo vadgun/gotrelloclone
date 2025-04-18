@@ -1,14 +1,15 @@
 package main
 
 import (
-	"log"
 	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/vadgun/gotrelloclone/task-service/config"
 	"github.com/vadgun/gotrelloclone/task-service/handlers"
-	"github.com/vadgun/gotrelloclone/task-service/kafka"
+	"github.com/vadgun/gotrelloclone/task-service/infra/config"
+	"github.com/vadgun/gotrelloclone/task-service/infra/kafka"
+	"github.com/vadgun/gotrelloclone/task-service/infra/logger"
+	"github.com/vadgun/gotrelloclone/task-service/infra/metrics"
 	"github.com/vadgun/gotrelloclone/task-service/repositories"
 	"github.com/vadgun/gotrelloclone/task-service/routes"
 	"github.com/vadgun/gotrelloclone/task-service/services"
@@ -17,6 +18,12 @@ import (
 func main() {
 	// Iniciar conexión a MongoDB
 	config.InitConfig()
+
+	// Inicializar metricas en Prometheus
+	metrics.InitMetrics()
+
+	// Iniciar el logger
+	logger.InitLogger()
 
 	// Inicializar repositorio y servicio
 	taskRepo := repositories.NewTaskRepository()
@@ -42,8 +49,11 @@ func main() {
 	// Configurar rutas
 	routes.SetupTaskRoutes(router, taskHandler)
 
+	// Envolver el manejador de Prometheus/http para rutearlo a gin
+	router.GET("/metrics", gin.WrapH(metrics.MetricsHandler()))
+
 	// Iniciar servidor en el puerto 8082
-	log.Println("🚀 task-service corriendo en http://task-service:8080")
+	logger.Log.Info("🚀 task-service corriendo en http://task-service:8080")
 	go kafka.StartConsumer()
 	router.Run(":8080")
 	select {}
