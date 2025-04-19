@@ -16,7 +16,10 @@ import (
 
 func main() {
 	// Iniciar conexión a MongoDB
-	config.InitConfig()
+	config.InitMongo()
+
+	// Iniciar conexión a Redis
+	config.InitRedis()
 
 	// Inicializar metricas en Prometheus
 	metrics.InitMetrics()
@@ -35,7 +38,7 @@ func main() {
 	// Configurar router Gin
 	router := gin.Default()
 
-	// Acivando CORS en default
+	// Acivando CORS para nuestro FrontEnd
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:5173"},
 		AllowMethods:     []string{"POST", "OPTIONS", "GET", "PUT", "PATCH", "DELETE"},
