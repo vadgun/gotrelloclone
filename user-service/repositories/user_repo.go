@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"time"
 
@@ -45,11 +46,29 @@ func (r *UserRepository) GetUserByEmail(email string) (*models.User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
+	// 1. Buscar en Redis
+	val, err := config.RedisClient.Get(ctx, "user_email:"+email).Result()
+	if err == nil {
+		var cachedUser models.User
+		if json.Unmarshal([]byte(val), &cachedUser) == nil {
+			logger.Log.Info("✅ User by email from cache")
+			return &cachedUser, nil
+		}
+	}
+
+	// 2. Si no está, ir a Mongo
 	var user models.User
-	err := r.collection.FindOne(ctx, bson.M{"email": email}).Decode(&user)
+	err = r.collection.FindOne(ctx, bson.M{"email": email}).Decode(&user)
 	if err != nil {
 		return nil, err
 	}
+
+	// 3. Guardar en cache
+	bytes, _ := json.Marshal(user)
+	config.RedisClient.Set(ctx, "user_email:"+email, bytes, 10*time.Minute)
+
+	logger.Log.Info("📥 User by email cached")
+
 	return &user, nil
 }
 
@@ -62,15 +81,30 @@ func (r *UserRepository) GetUserByID(userID string) (*models.User, error) {
 	if errs != nil {
 		return nil, errors.New("id no valida")
 	}
+	// 1. Revisar cache
+	val, err := config.RedisClient.Get(ctx, userID).Result()
+	if err == nil {
+		var cachedUser models.User
+		if err := json.Unmarshal([]byte(val), &cachedUser); err == nil {
+			logger.Log.Info("✅ UserByID from cache")
+			return &cachedUser, nil
+		}
+	}
 
+	// 2. Ir a Mongo si no está en cache
 	var user models.User
-	err := r.collection.FindOne(ctx, bson.M{"_id": userObjID}).Decode(&user)
+	err = r.collection.FindOne(ctx, bson.M{"_id": userObjID}).Decode(&user)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, errors.New("usuario no encontrado")
 		}
 		return nil, err
 	}
+
+	// 3. Guardar en cache
+	bytes, _ := json.Marshal(user)
+	config.RedisClient.Set(ctx, userID, bytes, 10*time.Minute) // TTL configurable
+	logger.Log.Info("📥 UserByID cached")
 
 	return &user, nil
 }
