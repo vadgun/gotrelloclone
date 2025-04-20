@@ -2,15 +2,15 @@ package config
 
 import (
 	"context"
-	"fmt"
-	"log"
 	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/redis/go-redis/v9"
+	"github.com/vadgun/gotrelloclone/user-service/infra/logger"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.uber.org/zap"
 )
 
 var (
@@ -34,14 +34,14 @@ func InitMongo() {
 	JWTSecret = os.Getenv("JWT_SECRET")
 
 	if mongoURI == "" || dbName == "" || JWTSecret == "" {
-		log.Fatal("Faltan variables de entorno necesarias")
+		logger.Log.Error("Faltan variables de entorno necesarias para mongo")
 	}
 
 	// Configurar conexión a MongoDB
 	clientOptions := options.Client().ApplyURI(mongoURI)
 	client, err := mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
-		log.Fatal("Error conectando a MongoDB:", err)
+		logger.Log.Error("Error conectando a MongoDB:", zap.String("error", err.Error()))
 	}
 
 	// Verificar conexión
@@ -49,12 +49,12 @@ func InitMongo() {
 	defer cancel()
 	err = client.Ping(ctx, nil)
 	if err != nil {
-		log.Fatal("No se pudo conectar a MongoDB:", err)
+		logger.Log.Error("No se pudo conectar a MongoDB:", zap.String("error", err.Error()))
 	}
 
 	// Asignar base de datos
 	DB = client.Database(dbName)
-	fmt.Println("✅ Conectado a MongoDB desde user-service:", dbName)
+	logger.Log.Info("✅ Conectado a MongoDB desde user-service:", zap.String("db_Name", dbName))
 }
 
 func InitRedis() {
@@ -64,7 +64,7 @@ func InitRedis() {
 
 	// Verificar variables de entorno necesarias
 	if redisAddr == "" {
-		log.Fatal("Falta la variable de entorno REDIS_ADDR")
+		logger.Log.Error("Falta la variable de entorno REDIS_ADDR")
 	}
 
 	// Inicializar cliente Redis
@@ -80,8 +80,8 @@ func InitRedis() {
 
 	_, err := RedisClient.Ping(ctx).Result()
 	if err != nil {
-		log.Fatal("No se pudo conectar a Redis:", err)
+		logger.Log.Error("No se pudo conectar a Redis:", zap.String("error", err.Error()))
 	}
 
-	fmt.Println("✅ Conectado a Redis en:", redisAddr)
+	logger.Log.Info("✅ Conectado a Redis en:", zap.String("redis_Addr", redisAddr))
 }

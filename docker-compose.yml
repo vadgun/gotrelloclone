@@ -191,6 +191,13 @@ services:
       - app-network
     command: mongod --quiet --logpath /dev/null
 
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+
 volumes:
   mongo_board_data:
   mongo_task_data:
