@@ -15,6 +15,9 @@ import (
 )
 
 func main() {
+	// Inicializar el logger
+	logger.InitLogger()
+
 	// Iniciar conexión a MongoDB
 	config.InitMongo()
 
@@ -23,9 +26,6 @@ func main() {
 
 	// Inicializar metricas en Prometheus
 	metrics.InitMetrics()
-
-	// Inicializar el logger
-	logger.InitLogger()
 
 	// Inicializar repositorio y servicio
 	userRepo := repositories.NewUserRepository()
