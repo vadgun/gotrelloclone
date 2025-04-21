@@ -16,11 +16,11 @@ import (
 
 // UserService maneja la lógica de negocio de usuarios.
 type UserService struct {
-	repo *repositories.UserRepository
+	repo repositories.UserRepositoryInterface
 }
 
 // NewUserService crea una nueva instancia del servicio.
-func NewUserService(repo *repositories.UserRepository) *UserService {
+func NewUserService(repo repositories.UserRepositoryInterface) *UserService {
 	return &UserService{repo: repo}
 }
 
