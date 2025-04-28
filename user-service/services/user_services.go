@@ -1,11 +1,12 @@
 package services
 
 import (
-	"encoding/json"
+	"context"
 	"errors"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/vadgun/gotrelloclone/user-service/infra/config"
@@ -16,26 +17,28 @@ import (
 
 // UserService maneja la lógica de negocio de usuarios.
 type UserService struct {
-	repo repositories.UserRepositoryInterface
+	repo   repositories.UserRepositoryInterface
+	Logger *zap.Logger
+	Kafka  *kafka.KafkaProducer
 }
 
 // NewUserService crea una nueva instancia del servicio.
-func NewUserService(repo repositories.UserRepositoryInterface) *UserService {
-	return &UserService{repo: repo}
+func NewUserService(repo repositories.UserRepositoryInterface, logger *zap.Logger, kafkaProducer *kafka.KafkaProducer) *UserService {
+	return &UserService{repo: repo, Logger: logger, Kafka: kafkaProducer}
 }
 
 // RegisterUser registra un usuario con contraseña encriptada.
-func (s *UserService) RegisterUser(name, email, password, phone, role string) error {
+func (s *UserService) RegisterUser(name, email, password, phone, role string) (string, error) {
 	// Verificar si el usuario ya existe
 	existingUser, _ := s.repo.GetUserByEmail(email)
 	if existingUser != nil {
-		return errors.New("el usuario ya existe")
+		return "", errors.New("el usuario ya existe")
 	}
 
 	// Hashear la contraseña
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	// Crear usuario
@@ -47,27 +50,31 @@ func (s *UserService) RegisterUser(name, email, password, phone, role string) er
 		Role:     role,
 	}
 
-	var kafkaUser struct {
-		ID string `json:"id" bson:"_id"`
-	}
-
 	// Guardar usuario en la BD
-	kafkaUser.ID, err = s.repo.CreateUser(user)
+	id, err := s.repo.CreateUser(user)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	jsonID, _ := json.Marshal(kafkaUser)
-	go kafka.ProduceMessage("", string(jsonID), "user-events", "new-user")
+	event := &models.UserCreatedEvent{
+		ID: id,
+	}
 
-	return nil
+	err = s.Kafka.Publish(context.TODO(), "new-user", event)
+	if err != nil {
+		s.Logger.Warn("⚠️ Usuario creado pero no se pudo publicar a Kafka", zap.String("id", id))
+	}
+
+	s.Logger.Info("✅ Usuario registrado correctamente")
+
+	return id, nil
 }
 
 // LoginUser autentica un usuario y genera un token JWT.
 func (s *UserService) LoginUser(email, password string) (string, *models.User, error) {
 	user, err := s.repo.GetUserByEmail(email)
 	if err != nil {
-		return "", nil, errors.New("usuario o contraseña incorrectos")
+		return "", nil, err
 	}
 
 	// Verificar la contraseña

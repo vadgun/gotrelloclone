@@ -29,6 +29,7 @@ export const registerUser = async (userData: { email: string, password: string, 
     return { success: true };
   } else {
     const data = await response.json();
+    console.log(response)
     return { success: false, error: data.message };
   }
 };

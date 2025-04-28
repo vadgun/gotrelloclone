@@ -25,9 +25,6 @@ function Login({ token, setToken, setUserName, setRole}: {
     const result = await loginUser(email, password);
 
     if (result.success) {
-
-      console.log(result.role)
-
       localStorage.setItem("token", result.token);
       localStorage.setItem("username", result.user)
       localStorage.setItem("role", result.role);
@@ -35,6 +32,7 @@ function Login({ token, setToken, setUserName, setRole}: {
       setUserName(result.user);
       setRole(result.role)
     } else {
+      console.log(result)
       Swal.fire('Error', result.error, 'error');
     }
   };

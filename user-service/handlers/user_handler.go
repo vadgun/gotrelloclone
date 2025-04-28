@@ -1,10 +1,11 @@
 package handlers
 
 import (
+	"errors"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/vadgun/gotrelloclone/user-service/infra/logger"
 	"github.com/vadgun/gotrelloclone/user-service/infra/metrics"
 	"github.com/vadgun/gotrelloclone/user-service/services"
 	"go.uber.org/zap"
@@ -13,11 +14,12 @@ import (
 // UserController maneja las peticiones HTTP de usuario.
 type UserHandler struct {
 	service *services.UserService
+	Logger  *zap.Logger
 }
 
 // NewUserController crea una nueva instancia del controlador.
-func NewUserHandler(service *services.UserService) *UserHandler {
-	return &UserHandler{service: service}
+func NewUserHandler(service *services.UserService, logger *zap.Logger) *UserHandler {
+	return &UserHandler{service: service, Logger: logger}
 }
 
 // Register maneja el registro de usuarios.
@@ -32,7 +34,9 @@ func (c *UserHandler) Register(ctx *gin.Context) {
 
 	// Validar la entrada
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		// logger.Log.Warn("❌ Error en el body", zap.Error(err))
+		log.Println("❌ Error en el body", err.Error())
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": errors.New(" Télefono o contraseña invalidos").Error()})
 		return
 	}
 
@@ -42,9 +46,10 @@ func (c *UserHandler) Register(ctx *gin.Context) {
 	}
 
 	// Registrar usuario
-	err := c.service.RegisterUser(req.Name, req.Email, req.Password, req.Phone, req.Role)
+	id, err := c.service.RegisterUser(req.Name, req.Email, req.Password, req.Phone, req.Role)
 	if err != nil {
-		ctx.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+		c.Logger.Error("❌ Error al registrar usuario", zap.Error(err))
+		ctx.JSON(http.StatusConflict, gin.H{"error": "Error al registrar usuario"})
 		return
 	}
 
@@ -52,9 +57,9 @@ func (c *UserHandler) Register(ctx *gin.Context) {
 	metrics.UsersCreated.Inc()
 
 	// Crear log personalizado
-	logger.Log.Info("Creando un nuevo usuario", zap.String("endpoint", ctx.Request.URL.Path), zap.String("method", "POST"))
+	c.Logger.Info("Guardando usuario en la base de datos", zap.String("endpoint", ctx.Request.URL.Path), zap.String("method", "POST"), zap.String("_id", id))
 
-	ctx.JSON(http.StatusCreated, gin.H{"message": "Usuario registrado correctamente"})
+	ctx.JSON(http.StatusCreated, gin.H{"message": "Usuario registrado correctamente", id: id})
 }
 
 // Login maneja la autenticación de usuarios.
@@ -74,13 +79,13 @@ func (c *UserHandler) Login(ctx *gin.Context) {
 	token, user, err := c.service.LoginUser(req.Email, req.Password)
 	if err != nil {
 		metrics.LoginAttempts.WithLabelValues("fail").Inc()
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": errors.New("usuario no registrado").Error()})
 		return
 	}
 	metrics.LoginAttempts.WithLabelValues("success").Inc()
 
 	// Crear log personalizado
-	logger.Log.Info("Usuario loggeado", zap.String("endpoint", ctx.Request.URL.Path), zap.String("method", "POST"), zap.String("user_email", req.Email))
+	c.Logger.Info("Usuario loggeado", zap.String("endpoint", ctx.Request.URL.Path), zap.String("method", "POST"), zap.String("user_email", req.Email))
 
 	ctx.JSON(http.StatusOK, gin.H{"token": token, "user": user.Name, "role": user.Role})
 }

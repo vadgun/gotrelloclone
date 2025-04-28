@@ -12,4 +12,6 @@ func InitLogger() {
 	if err != nil {
 		panic("No se pudo inicializar zap logger: " + err.Error())
 	}
+
+	Log.Info("✅ Logger Inicializado")
 }

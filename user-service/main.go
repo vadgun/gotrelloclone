@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/vadgun/gotrelloclone/user-service/handlers"
 	"github.com/vadgun/gotrelloclone/user-service/infra/config"
+	"github.com/vadgun/gotrelloclone/user-service/infra/kafka"
 	"github.com/vadgun/gotrelloclone/user-service/infra/logger"
 	"github.com/vadgun/gotrelloclone/user-service/infra/metrics"
 	"github.com/vadgun/gotrelloclone/user-service/repositories"
@@ -17,6 +18,7 @@ import (
 func main() {
 	// Inicializar el logger
 	logger.InitLogger()
+	log := logger.Log
 
 	// Iniciar conexión a MongoDB
 	config.InitMongo()
@@ -27,10 +29,21 @@ func main() {
 	// Inicializar metricas en Prometheus
 	metrics.InitMetrics()
 
-	// Inicializar repositorio y servicio
-	userRepo := repositories.NewUserRepository()
-	userService := services.NewUserService(userRepo)
-	userHandler := handlers.NewUserHandler(userService)
+	// Inicializar repositorio
+	userRepo := repositories.NewUserRepository(
+		config.DB.Collection("users"),
+		config.RedisClient,
+		log,
+	)
+
+	// Productor de kafka
+	kafkaProducer := kafka.NewKafkaProducer("kafka:9092", "user-events", log)
+
+	// Inicializar el servicio
+	userService := services.NewUserService(userRepo, log, kafkaProducer)
+
+	// Inicializar el handler
+	userHandler := handlers.NewUserHandler(userService, log)
 
 	// Configurar el servicio en modo producción
 	gin.SetMode(gin.ReleaseMode)
@@ -56,6 +69,6 @@ func main() {
 	router.GET("/metrics", gin.WrapH(metrics.MetricsHandler()))
 
 	// Iniciar servidor en el puerto 8080
-	logger.Log.Info("🚀 user-service corriendo en http://user-service:8080")
+	log.Info("🚀 user-service corriendo en http://user-service:8080")
 	router.Run(":8080")
 }

@@ -6,8 +6,8 @@ import (
 	"errors"
 	"time"
 
+	"github.com/redis/go-redis/v9"
 	"github.com/vadgun/gotrelloclone/user-service/infra/config"
-	"github.com/vadgun/gotrelloclone/user-service/infra/logger"
 	"github.com/vadgun/gotrelloclone/user-service/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -17,13 +17,17 @@ import (
 
 // UserRepository maneja las operaciones con MongoDB.
 type UserRepository struct {
-	collection *mongo.Collection
+	Collection  *mongo.Collection
+	RedisClient *redis.Client
+	Logger      *zap.Logger
 }
 
 // NewUserRepository crea una nueva instancia del repositorio.
-func NewUserRepository() *UserRepository {
+func NewUserRepository(collection *mongo.Collection, redisClient *redis.Client, logger *zap.Logger) *UserRepository {
 	return &UserRepository{
-		collection: config.DB.Collection("users"),
+		Collection:  collection,
+		RedisClient: redisClient,
+		Logger:      logger,
 	}
 }
 
@@ -33,12 +37,19 @@ func (r *UserRepository) CreateUser(user *models.User) (string, error) {
 	defer cancel()
 
 	user.CreatedAt = time.Now()
-	mongoResult, err := r.collection.InsertOne(ctx, user)
-	id := mongoResult.InsertedID.(primitive.ObjectID).Hex()
+	mongoResult, err := r.Collection.InsertOne(ctx, user)
+	if err != nil {
+		return "", err
+	}
 
-	logger.Log.Info("Guardando usuario en la base de datos", zap.String("user_id", id))
+	oid, ok := mongoResult.InsertedID.(primitive.ObjectID)
+	if !ok {
+		return "", errors.New("no se pudo obtener el ID del usuario")
+	}
 
-	return id, err
+	id := oid.Hex()
+
+	return id, nil
 }
 
 // GetUserByEmail busca un usuario por su email.
@@ -47,27 +58,27 @@ func (r *UserRepository) GetUserByEmail(email string) (*models.User, error) {
 	defer cancel()
 
 	// 1. Buscar en Redis
-	val, err := config.RedisClient.Get(ctx, "user_email:"+email).Result()
+	val, err := r.RedisClient.Get(ctx, "user_email:"+email).Result()
 	if err == nil {
 		var cachedUser models.User
 		if json.Unmarshal([]byte(val), &cachedUser) == nil {
-			logger.Log.Info("✅ User by email from cache")
+			r.Logger.Info("✅ User by email from cache")
 			return &cachedUser, nil
 		}
 	}
 
 	// 2. Si no está, ir a Mongo
 	var user models.User
-	err = r.collection.FindOne(ctx, bson.M{"email": email}).Decode(&user)
+	err = r.Collection.FindOne(ctx, bson.M{"email": email}).Decode(&user)
 	if err != nil {
 		return nil, err
 	}
 
 	// 3. Guardar en cache
 	bytes, _ := json.Marshal(user)
-	config.RedisClient.Set(ctx, "user_email:"+email, bytes, 10*time.Minute)
+	r.RedisClient.Set(ctx, "user_email:"+email, bytes, 10*time.Minute)
 
-	logger.Log.Info("📥 User by email cached")
+	r.Logger.Info("📥 User by email cached")
 
 	return &user, nil
 }
@@ -86,14 +97,14 @@ func (r *UserRepository) GetUserByID(userID string) (*models.User, error) {
 	if err == nil {
 		var cachedUser models.User
 		if err := json.Unmarshal([]byte(val), &cachedUser); err == nil {
-			logger.Log.Info("✅ UserByID from cache")
+			r.Logger.Info("✅ UserByID from cache")
 			return &cachedUser, nil
 		}
 	}
 
 	// 2. Ir a Mongo si no está en cache
 	var user models.User
-	err = r.collection.FindOne(ctx, bson.M{"_id": userObjID}).Decode(&user)
+	err = r.Collection.FindOne(ctx, bson.M{"_id": userObjID}).Decode(&user)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, errors.New("usuario no encontrado")
@@ -104,7 +115,7 @@ func (r *UserRepository) GetUserByID(userID string) (*models.User, error) {
 	// 3. Guardar en cache
 	bytes, _ := json.Marshal(user)
 	config.RedisClient.Set(ctx, userID, bytes, 10*time.Minute) // TTL configurable
-	logger.Log.Info("📥 UserByID cached")
+	r.Logger.Info("📥 UserByID cached")
 
 	return &user, nil
 }
@@ -116,7 +127,7 @@ func (r *UserRepository) GetAllUsers() ([]models.User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	cursor, err := r.collection.Find(ctx, bson.M{})
+	cursor, err := r.Collection.Find(ctx, bson.M{})
 	if err != nil {
 		return nil, err
 	}
