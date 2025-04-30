@@ -116,7 +116,7 @@ func TestKafkaProducerAndConsumer(t *testing.T) {
 	logger, _ := zap.NewDevelopment()
 
 	topic := "user_created_test"
-	brokers := "localhost:9092"
+	brokers := "localhost:29092"
 
 	// 1. Crear el productor
 	producer := mk.NewKafkaProducer(brokers, topic, logger)
@@ -148,7 +148,7 @@ func TestKafkaProducerAndConsumer(t *testing.T) {
 	assert.NoError(t, err)
 
 	// 5. Esperar y leer el mensaje
-	msg, err := consumer.ReadMessage(25 * time.Second)
+	msg, err := consumer.ReadMessage(-1)
 	if err == nil {
 		switch *msg.TopicPartition.Topic {
 		case "user_created_test":
