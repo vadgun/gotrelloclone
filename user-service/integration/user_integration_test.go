@@ -3,7 +3,6 @@ package integration
 import (
 	"context"
 	"encoding/json"
-	"log"
 	"testing"
 	"time"
 
@@ -117,10 +116,11 @@ func TestKafkaProducerAndConsumer(t *testing.T) {
 
 	topic := "user_created_test"
 	brokers := "localhost:29092"
+	err := mk.CreateTopic(brokers, topic)
+	assert.NoError(t, err)
 
 	// 1. Crear el productor
 	producer := mk.NewKafkaProducer(brokers, topic, logger)
-
 	// 2. Crear un mensaje de prueba
 	type UserCreatedEvent struct {
 		ID string `json:"id"`
@@ -130,7 +130,7 @@ func TestKafkaProducerAndConsumer(t *testing.T) {
 		ID: "test123",
 	}
 
-	// 4. Crear un consumidor temporal
+	// 4. Crear un consumidor temporal y suscribirse al Topic de testing
 	consumer, err := kafka.NewConsumer(&kafka.ConfigMap{
 		"bootstrap.servers": brokers,
 		"group.id":          "test-group",
@@ -149,14 +149,6 @@ func TestKafkaProducerAndConsumer(t *testing.T) {
 
 	// 5. Esperar y leer el mensaje
 	msg, err := consumer.ReadMessage(-1)
-	if err == nil {
-		switch *msg.TopicPartition.Topic {
-		case "user_created_test":
-			log.Printf("📨 Evento recibido | Topic: %s | Message: %s| Key: %s\n", *msg.TopicPartition.Topic, string(msg.Value), string([]byte(msg.Key)))
-		}
-	} else {
-		log.Printf("⚠️ Error al recibir mensaje: %v\n", err)
-	}
 	assert.NoError(t, err)
 	assert.NotEmpty(t, msg)
 
@@ -164,6 +156,9 @@ func TestKafkaProducerAndConsumer(t *testing.T) {
 	var receivedEvent UserCreatedEvent
 	err = json.Unmarshal(msg.Value, &receivedEvent)
 	assert.NoError(t, err)
-
 	assert.Equal(t, event.ID, receivedEvent.ID)
+
+	// 7. Limpiar el Topic creado
+	err = mk.CleanUpTopic(brokers, topic)
+	assert.NoError(t, err)
 }
