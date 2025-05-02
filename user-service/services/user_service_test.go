@@ -9,54 +9,14 @@ import (
 	"github.com/vadgun/gotrelloclone/user-service/infra/kafka"
 	"github.com/vadgun/gotrelloclone/user-service/infra/logger"
 	"github.com/vadgun/gotrelloclone/user-service/models"
+	repomocks "github.com/vadgun/gotrelloclone/user-service/repositories/mocks"
 	"github.com/vadgun/gotrelloclone/user-service/services"
 	"golang.org/x/crypto/bcrypt"
 )
 
-// Mock del repositorio que prueba la interacción a través de la abstracción correcta.
-type MockUserRepo struct {
-	mock.Mock
-}
-
-func (m *MockUserRepo) CreateUser(user *models.User) (string, error) {
-	args := m.Called(user)
-	return args.String(0), args.Error(1)
-}
-
-func (m *MockUserRepo) GetUserByEmail(email string) (*models.User, error) {
-	args := m.Called(email)
-
-	if user := args.Get(0); user != nil {
-		return user.(*models.User), args.Error(1)
-	}
-
-	return nil, args.Error(1)
-}
-
-func (m *MockUserRepo) GetUserByID(userID string) (*models.User, error) {
-	args := m.Called(userID)
-
-	if user := args.Get(0); user != nil {
-		return user.(*models.User), args.Error(1)
-	}
-
-	return nil, args.Error(1)
-
-}
-
-func (m *MockUserRepo) GetAllUsers() ([]models.User, error) {
-	args := m.Called()
-	if user := args.Get(0); user != nil {
-		return user.([]models.User), args.Error(1)
-	}
-
-	return nil, args.Error(1)
-
-}
-
 func TestUserService_LoginUser_Success(t *testing.T) {
 	// Repositorio Mockeado de user-repository
-	mockRepo := new(MockUserRepo)
+	mockRepo := new(repomocks.MockUserRepo)
 
 	// Obtener el Logger para nuestro servicio
 	logger.InitLogger()
@@ -103,7 +63,7 @@ func TestUserService_LoginUser_Success(t *testing.T) {
 
 func TestUserService_LoginUser_InvalidPassword(t *testing.T) {
 	// Repositorio Mockeado de user-repository
-	mockRepo := new(MockUserRepo)
+	mockRepo := new(repomocks.MockUserRepo)
 
 	// Generar el hash para el usuario a logearse en el test
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("secretagent"), bcrypt.DefaultCost)
@@ -117,7 +77,7 @@ func TestUserService_LoginUser_InvalidPassword(t *testing.T) {
 }
 
 func TestUserService_LoginUser_InvalidEmail(t *testing.T) {
-	mockRepo := new(MockUserRepo)
+	mockRepo := new(repomocks.MockUserRepo)
 	// Obtener el Logger para nuestro servicio
 	logger.InitLogger()
 	log := logger.Log
@@ -137,7 +97,7 @@ func TestUserService_LoginUser_InvalidEmail(t *testing.T) {
 }
 
 func TestUserService_RegisterUser(t *testing.T) {
-	mockRepo := new(MockUserRepo)
+	mockRepo := new(repomocks.MockUserRepo)
 	// Obtener el Logger para nuestro servicio
 	logger.InitLogger()
 	log := logger.Log
@@ -168,7 +128,7 @@ func TestUserService_RegisterUser(t *testing.T) {
 	})
 
 	t.Run("error al crear usuario cuando la bd falle", func(t *testing.T) {
-		mockRepo := new(MockUserRepo)
+		mockRepo := new(repomocks.MockUserRepo)
 		service := services.NewUserService(mockRepo, log, kafkaProducer)
 
 		email := "fail@example.com"
@@ -184,7 +144,7 @@ func TestUserService_RegisterUser(t *testing.T) {
 }
 
 func TestUserService_GetUserByID(t *testing.T) {
-	mockRepo := new(MockUserRepo) // Obtener el Logger para nuestro servicio
+	mockRepo := new(repomocks.MockUserRepo) // Obtener el Logger para nuestro servicio
 	logger.InitLogger()
 	log := logger.Log
 	kafkaProducer := kafka.NewKafkaProducer("kafka:9092", "testing_user_service", log)
@@ -216,7 +176,7 @@ func TestUserService_GetUserByID(t *testing.T) {
 }
 
 func TestUserService_GetAllUsers(t *testing.T) {
-	mockRepo := new(MockUserRepo) // Obtener el Logger para nuestro servicio
+	mockRepo := new(repomocks.MockUserRepo) // Obtener el Logger para nuestro servicio
 	logger.InitLogger()
 	log := logger.Log
 	kafkaProducer := kafka.NewKafkaProducer("kafka:9092", "testing_user_service", log)
