@@ -3,6 +3,7 @@ package handlers_test
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -10,6 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/vadgun/gotrelloclone/user-service/handlers"
+	"github.com/vadgun/gotrelloclone/user-service/models"
 	servicemocks "github.com/vadgun/gotrelloclone/user-service/services/mocks"
 	"go.uber.org/zap"
 )
@@ -25,15 +27,15 @@ func setupRouter(handler *handlers.UserHandler) *gin.Engine {
 	return r
 }
 
-func TestRegister_Sucess(t *testing.T) {
+func TestUserHandler_Register_Sucess(t *testing.T) {
 	mockService := new(servicemocks.UserServiceMock)
 	logger := zap.NewNop()
-	handler := handlers.NewUserHandler(mockService, logger)
+	mockHandler := handlers.NewUserHandler(mockService, logger)
 
 	// Datos de entrada
 	input := map[string]string{
-		"name":     "Juan Perez",
-		"email":    "juan@example.com",
+		"name":     "JoseR",
+		"email":    "success@example.com",
 		"password": "123456",
 		"phone":    "1234567890",
 	}
@@ -44,7 +46,7 @@ func TestRegister_Sucess(t *testing.T) {
 		Return("mocked-id", nil)
 
 	// Preparar el servidor de prueba
-	router := setupRouter(handler)
+	router := setupRouter(mockHandler)
 
 	// Ejecutar la solicitud
 	req, _ := http.NewRequest(http.MethodPost, "/register", bytes.NewBuffer(jsonValue))
@@ -57,4 +59,99 @@ func TestRegister_Sucess(t *testing.T) {
 	assert.Contains(t, resp.Body.String(), "Usuario registrado correctamente")
 
 	mockService.AssertExpectations(t)
+}
+
+func TestUserHandler_Register_InvalidInput(t *testing.T) {
+	mockService := new(servicemocks.UserServiceMock)
+	logger := zap.NewNop()
+	mockHandler := handlers.NewUserHandler(mockService, logger)
+
+	// Datos de entrada
+	invalidInput := map[string]string{
+		"name":     "JoseR",
+		"email":    "invalid@example.com",
+		"password": "12345",
+		"phone":    "123456789",
+	}
+	jsonValue, _ := json.Marshal(invalidInput)
+
+	mockService.On("RegisterUser", invalidInput["name"], invalidInput["email"], invalidInput["password"], invalidInput["phone"], "member").
+		Return("", errors.New("Télefono o contraseña invalidos"))
+
+	// Server
+	router := setupRouter(mockHandler)
+
+	// Ejecutar la solicitud
+	req, _ := http.NewRequest(http.MethodPost, "/register", bytes.NewBuffer(jsonValue))
+	req.Header.Set("Content-Type", "application/json")
+	resp := httptest.NewRecorder()
+	router.ServeHTTP(resp, req)
+
+	// Verificar la respuesta invalida
+	assert.Equal(t, http.StatusBadRequest, resp.Code)
+	assert.Contains(t, resp.Body.String(), "Télefono o contraseña invalidos")
+}
+
+func TestUserHandler_Register_EmailExists(t *testing.T) {
+	mockService := new(servicemocks.UserServiceMock)
+	logger := zap.NewNop()
+	mockHandler := handlers.NewUserHandler(mockService, logger)
+
+	// Server
+	router := setupRouter(mockHandler)
+
+	userd := map[string]string{
+		"name":     "JoseR",
+		"email":    "existing@example.com",
+		"password": "123456",
+		"phone":    "1234567890",
+	}
+	userdjsv, _ := json.Marshal(userd)
+	expectedError := errors.New("Error al registrar usuario")
+
+	mockService.On("RegisterUser", userd["name"], userd["email"], userd["password"], userd["phone"], "member").
+		Return("", expectedError)
+
+	req, _ := http.NewRequest(http.MethodPost, "/register", bytes.NewBuffer(userdjsv))
+	resp := httptest.NewRecorder()
+	router.ServeHTTP(resp, req)
+
+	// Verificar la respuesta invalida
+	assert.Equal(t, http.StatusConflict, resp.Code)
+	assert.Contains(t, resp.Body.String(), expectedError.Error())
+	mockService.AssertExpectations(t)
+}
+
+func TestUserHandler_Login(t *testing.T) {
+	mockService := new(servicemocks.UserServiceMock)
+	logger := zap.NewNop()
+	mockHandler := handlers.NewUserHandler(mockService, logger)
+	router := setupRouter(mockHandler)
+
+	t.Run("login existoso", func(t *testing.T) {
+		user := &models.User{Name: "Jose", Email: "jose@test.com", Role: "admin"}
+		mockService.On("LoginUser", user.Email, "secretagent").Return("mocked-token", user, nil)
+		body := map[string]string{
+			"email":    "jose@test.com",
+			"password": "secretagent",
+		}
+		jsonBody, _ := json.Marshal(body)
+
+		req, _ := http.NewRequest(http.MethodPost, "/login", bytes.NewBuffer(jsonBody))
+		req.Header.Set("Content-Type", "application/json")
+		resp := httptest.NewRecorder()
+		router.ServeHTTP(resp, req)
+
+		assert.Equal(t, http.StatusOK, resp.Code)
+		assert.Contains(t, resp.Body.String(), "mocked-token")
+	})
+
+	t.Run("login invalido", func(t *testing.T) {
+
+	})
+
+	t.Run("usuario no existe", func(t *testing.T) {
+
+	})
+
 }

@@ -33,7 +33,7 @@ func (c *UserHandler) Register(ctx *gin.Context) {
 
 	// Validar la entrada
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		c.Logger.Info("❌ Error en el body", zap.Error(err))
+		// c.Logger.Info("❌ Error en el body", zap.Error(err))
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": errors.New(" Télefono o contraseña invalidos").Error()})
 		return
 	}

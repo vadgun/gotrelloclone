@@ -1,15 +1,15 @@
 mode: set
 github.com/vadgun/gotrelloclone/user-service/handlers/user_handler.go:20.93,22.2 1 1
 github.com/vadgun/gotrelloclone/user-service/handlers/user_handler.go:25.50,35.49 2 1
-github.com/vadgun/gotrelloclone/user-service/handlers/user_handler.go:35.49,39.3 3 0
+github.com/vadgun/gotrelloclone/user-service/handlers/user_handler.go:35.49,39.3 2 1
 github.com/vadgun/gotrelloclone/user-service/handlers/user_handler.go:42.2,43.16 2 1
-github.com/vadgun/gotrelloclone/user-service/handlers/user_handler.go:43.16,47.3 3 0
+github.com/vadgun/gotrelloclone/user-service/handlers/user_handler.go:43.16,47.3 3 1
 github.com/vadgun/gotrelloclone/user-service/handlers/user_handler.go:50.2,55.92 3 1
-github.com/vadgun/gotrelloclone/user-service/handlers/user_handler.go:59.47,66.49 2 0
+github.com/vadgun/gotrelloclone/user-service/handlers/user_handler.go:59.47,66.49 2 1
 github.com/vadgun/gotrelloclone/user-service/handlers/user_handler.go:66.49,70.3 3 0
-github.com/vadgun/gotrelloclone/user-service/handlers/user_handler.go:73.2,74.16 2 0
+github.com/vadgun/gotrelloclone/user-service/handlers/user_handler.go:73.2,74.16 2 1
 github.com/vadgun/gotrelloclone/user-service/handlers/user_handler.go:74.16,79.3 4 0
-github.com/vadgun/gotrelloclone/user-service/handlers/user_handler.go:80.2,85.86 3 0
+github.com/vadgun/gotrelloclone/user-service/handlers/user_handler.go:80.2,85.86 3 1
 github.com/vadgun/gotrelloclone/user-service/handlers/user_handler.go:89.49,92.13 2 0
 github.com/vadgun/gotrelloclone/user-service/handlers/user_handler.go:92.13,95.3 2 0
 github.com/vadgun/gotrelloclone/user-service/handlers/user_handler.go:98.2,99.16 2 0
