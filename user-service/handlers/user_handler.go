@@ -65,7 +65,7 @@ func (c *UserHandler) Login(ctx *gin.Context) {
 	// Validar la entrada
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		c.Logger.Info("❌ Usuario y contraseña requeridos al loguearse", zap.Error(err))
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": errors.New("usuario y contraseña requeridos al loguearse").Error()})
 		return
 	}
 
@@ -108,7 +108,7 @@ func (c *UserHandler) GetUserByID(ctx *gin.Context) {
 	userID := ctx.Param("userID")
 	user, err := c.service.GetUserByID(userID)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudo obtener el usuario"})
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "No se pudo obtener el usuario"})
 		return
 	}
 	ctx.JSON(http.StatusOK, user)

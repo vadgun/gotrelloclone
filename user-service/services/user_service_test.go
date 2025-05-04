@@ -78,7 +78,6 @@ func TestUserService_LoginUser_InvalidPassword(t *testing.T) {
 
 func TestUserService_LoginUser_InvalidEmail(t *testing.T) {
 	mockRepo := new(repomocks.MockUserRepo)
-	// Obtener el Logger para nuestro servicio
 	logger.InitLogger()
 	log := logger.Log
 	kafkaProducer := kafka.NewKafkaProducer("kafka:9092", "testing_user_service", log)
@@ -98,7 +97,6 @@ func TestUserService_LoginUser_InvalidEmail(t *testing.T) {
 
 func TestUserService_RegisterUser(t *testing.T) {
 	mockRepo := new(repomocks.MockUserRepo)
-	// Obtener el Logger para nuestro servicio
 	logger.InitLogger()
 	log := logger.Log
 	kafkaProducer := kafka.NewKafkaProducer("kafka:9092", "testing_user_service", log)
@@ -144,7 +142,7 @@ func TestUserService_RegisterUser(t *testing.T) {
 }
 
 func TestUserService_GetUserByID(t *testing.T) {
-	mockRepo := new(repomocks.MockUserRepo) // Obtener el Logger para nuestro servicio
+	mockRepo := new(repomocks.MockUserRepo)
 	logger.InitLogger()
 	log := logger.Log
 	kafkaProducer := kafka.NewKafkaProducer("kafka:9092", "testing_user_service", log)
@@ -176,7 +174,7 @@ func TestUserService_GetUserByID(t *testing.T) {
 }
 
 func TestUserService_GetAllUsers(t *testing.T) {
-	mockRepo := new(repomocks.MockUserRepo) // Obtener el Logger para nuestro servicio
+	mockRepo := new(repomocks.MockUserRepo)
 	logger.InitLogger()
 	log := logger.Log
 	kafkaProducer := kafka.NewKafkaProducer("kafka:9092", "testing_user_service", log)
