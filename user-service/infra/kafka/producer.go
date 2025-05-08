@@ -17,6 +17,7 @@ type KafkaProducer struct {
 func NewKafkaProducer(brokers string, topic string, logger *zap.Logger) *KafkaProducer {
 	producer, err := kafka.NewProducer(&kafka.ConfigMap{
 		"bootstrap.servers": brokers,
+		"acks":              "all",
 	})
 	if err != nil {
 		logger.Fatal("❌ No se pudo crear el productor de Kafka", zap.Error(err))

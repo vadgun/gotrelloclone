@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"errors"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -13,12 +12,12 @@ import (
 
 // UserController maneja las peticiones HTTP de usuario.
 type UserHandler struct {
-	service *services.UserService
+	service services.UserServiceInterface
 	Logger  *zap.Logger
 }
 
 // NewUserController crea una nueva instancia del controlador.
-func NewUserHandler(service *services.UserService, logger *zap.Logger) *UserHandler {
+func NewUserHandler(service services.UserServiceInterface, logger *zap.Logger) *UserHandler {
 	return &UserHandler{service: service, Logger: logger}
 }
 
@@ -29,26 +28,20 @@ func (c *UserHandler) Register(ctx *gin.Context) {
 		Email    string `json:"email" binding:"required,email"`
 		Password string `json:"password" binding:"required,min=6"`
 		Phone    string `json:"phone" binding:"required,min=10"`
-		Role     string `json:"role"`
+		Role     string
 	}
 
 	// Validar la entrada
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		// logger.Log.Warn("❌ Error en el body", zap.Error(err))
-		log.Println("❌ Error en el body", err.Error())
+		// c.Logger.Info("❌ Error en el body", zap.Error(err))
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": errors.New(" Télefono o contraseña invalidos").Error()})
 		return
 	}
 
-	// Rol por defecto
-	if req.Role == "" {
-		req.Role = "member"
-	}
-
-	// Registrar usuario
-	id, err := c.service.RegisterUser(req.Name, req.Email, req.Password, req.Phone, req.Role)
+	// Registrar usuario usando un rol por defecto
+	id, err := c.service.RegisterUser(req.Name, req.Email, req.Password, req.Phone, "member")
 	if err != nil {
-		c.Logger.Error("❌ Error al registrar usuario", zap.Error(err))
+		c.Logger.Info("❌ Error al registrar usuario", zap.Error(err))
 		ctx.JSON(http.StatusConflict, gin.H{"error": "Error al registrar usuario"})
 		return
 	}
@@ -71,7 +64,8 @@ func (c *UserHandler) Login(ctx *gin.Context) {
 
 	// Validar la entrada
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.Logger.Info("❌ Usuario y contraseña requeridos al loguearse", zap.Error(err))
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": errors.New("usuario y contraseña requeridos al loguearse").Error()})
 		return
 	}
 
@@ -79,6 +73,7 @@ func (c *UserHandler) Login(ctx *gin.Context) {
 	token, user, err := c.service.LoginUser(req.Email, req.Password)
 	if err != nil {
 		metrics.LoginAttempts.WithLabelValues("fail").Inc()
+		c.Logger.Info("❌ Datos incorrectos o usuario no registrado", zap.Error(err))
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": errors.New("usuario no registrado").Error()})
 		return
 	}
@@ -113,7 +108,7 @@ func (c *UserHandler) GetUserByID(ctx *gin.Context) {
 	userID := ctx.Param("userID")
 	user, err := c.service.GetUserByID(userID)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudo obtener el usuario"})
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "No se pudo obtener el usuario"})
 		return
 	}
 	ctx.JSON(http.StatusOK, user)

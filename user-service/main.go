@@ -10,6 +10,7 @@ import (
 	"github.com/vadgun/gotrelloclone/user-service/infra/kafka"
 	"github.com/vadgun/gotrelloclone/user-service/infra/logger"
 	"github.com/vadgun/gotrelloclone/user-service/infra/metrics"
+	"github.com/vadgun/gotrelloclone/user-service/middlewares"
 	"github.com/vadgun/gotrelloclone/user-service/repositories"
 	"github.com/vadgun/gotrelloclone/user-service/routes"
 	"github.com/vadgun/gotrelloclone/user-service/services"
@@ -63,6 +64,9 @@ func main() {
 
 	// Configurar rutas
 	routes.SetupUserRoutes(router, userHandler)
+
+	// Limitar la tasa de peticiones
+	router.Use(middlewares.RateLimitMiddleware())
 
 	// Envolver el manejador de Prometheus/http para rutearlo a gin
 	router.Use(metrics.MetricsMiddleware())
