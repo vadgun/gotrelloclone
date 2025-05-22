@@ -1,0 +1,823 @@
+openapi: 3.0.0
+info:
+  title: Trello Clone API
+  description: API for a Trello clone application with user, board, task, and notification services.
+  version: v1.0.0
+servers:
+  - url: http://localhost:8080/api/v1 # Assuming a local setup, adjust if necessary
+    description: Local development server for User Service
+  - url: http://localhost:8081/api/v1 # Assuming a local setup, adjust if necessary
+    description: Local development server for Board Service
+  - url: http://localhost:8082/api/v1 # Assuming a local setup, adjust if necessary
+    description: Local development server for Task Service
+  - url: http://localhost:8083/api/v1 # Assuming a local setup, adjust if necessary
+    description: Local development server for Notification Service
+tags:
+  - name: User
+    description: Operations related to users
+  - name: Admin
+    description: Operations restricted to administrators
+  - name: Board
+    description: Operations related to boards
+  - name: Task
+    description: Operations related to tasks
+  - name: Notification
+    description: Operations related to notifications and WebSocket communication
+paths:
+  /notify:
+    post:
+      summary: Send a notification
+      tags:
+        - Notification
+      # Assuming this might be an internal or protected endpoint
+      # security:
+      #   - bearerAuth: [] # Or some other appropriate security
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationRequest'
+      responses:
+        '202': # Accepted for asynchronous processing
+          description: Notification accepted for delivery
+          content:
+            application/json: # Or plain text response
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Notification sent to Kafka topic
+        '400':
+          description: Invalid input
+  /ws:
+    get: # Typically WebSockets are initiated with a GET, then protocol upgrade
+      summary: Establish a WebSocket connection for real-time notifications
+      tags:
+        - Notification
+      description: |
+        Establishes a WebSocket connection. 
+        Authentication might be handled via query parameters or initial handshake message.
+        The server will push `Notification` objects to the client over this connection.
+      parameters:
+        - name: token # Example: Pass JWT token as a query parameter for WS auth
+          in: query
+          required: false # Depending on auth strategy
+          description: Authentication token for WebSocket connection
+          schema:
+            type: string
+      responses:
+        '101':
+          description: Switching protocols to WebSocket.
+          # Headers for WebSocket upgrade would be defined here if needed by OpenAPI spec
+          # The actual messages are defined by the application protocol over WebSocket
+          # and not typically detailed further in REST-focused OpenAPI for the messages themselves.
+          # You can describe the type of messages sent/received in the description.
+          content:
+            application/json: # Example schema for messages pushed via WebSocket
+              schema:
+                $ref: '#/components/schemas/Notification'
+        '400':
+          description: Bad request (e.g., missing auth if required)
+        '401':
+          description: Unauthorized
+  /tasks:
+    post:
+      summary: Create a new task
+      tags:
+        - Task
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskCreateRequest'
+      responses:
+        '201':
+          description: Task created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          description: Invalid input
+        '401':
+          description: Unauthorized
+  /tasks/board/{boardID}:
+    get:
+      summary: Get all tasks for a specific board
+      tags:
+        - Task
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: boardID
+          in: path
+          required: true
+          description: ID of the board to retrieve tasks from
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Board not found
+  /tasks/{taskID}:
+    get:
+      summary: Get a task by its ID
+      tags:
+        - Task
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: taskID
+          in: path
+          required: true
+          description: ID of the task to retrieve
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Task not found
+    put:
+      summary: Update a task by its ID
+      tags:
+        - Task
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: taskID
+          in: path
+          required: true
+          description: ID of the task to update
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskUpdateRequest'
+      responses:
+        '200':
+          description: Task updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          description: Invalid input
+        '401':
+          description: Unauthorized
+        '404':
+          description: Task not found
+    delete:
+      summary: Delete a task by its ID
+      tags:
+        - Task
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: taskID
+          in: path
+          required: true
+          description: ID of the task to delete
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Task deleted successfully
+        '401':
+          description: Unauthorized
+        '404':
+          description: Task not found
+  /tasks/{taskID}/move:
+    put:
+      summary: Move a task to a different board
+      tags:
+        - Task
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: taskID
+          in: path
+          required: true
+          description: ID of the task to move
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskMoveRequest' # Define this schema
+      responses:
+        '200':
+          description: Task moved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          description: Invalid input (e.g., target board does not exist)
+        '401':
+          description: Unauthorized
+        '404':
+          description: Task not found
+  /tasks/{taskID}/assign:
+    put:
+      summary: Assign a task to a user
+      tags:
+        - Task
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: taskID
+          in: path
+          required: true
+          description: ID of the task to assign
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskAssignRequest' # Define this schema
+      responses:
+        '200':
+          description: Task assigned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          description: Invalid input (e.g., assignee does not exist)
+        '401':
+          description: Unauthorized
+        '404':
+          description: Task not found
+  /tasks/{taskID}/status:
+    put:
+      summary: Update the status of a task
+      tags:
+        - Task
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: taskID
+          in: path
+          required: true
+          description: ID of the task whose status is to be updated
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskStatusUpdateRequest' # Define this schema
+      responses:
+        '200':
+          description: Task status updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          description: Invalid status value
+        '401':
+          description: Unauthorized
+        '404':
+          description: Task not found
+  /admin/tasks:
+    get:
+      summary: Get all tasks (Admin only)
+      tags:
+        - Admin # Reusing Admin tag
+      security:
+        - bearerAuth: [] # Requires authentication and admin role
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (User is not an admin)
+  /users/register:
+    post:
+      summary: Register a new user
+      tags:
+        - User
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegisterRequest'
+      responses:
+        '201': # Assuming 201 Created for successful registration
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid input
+  /users/login:
+    post:
+      summary: Log in a user
+      tags:
+        - User
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLoginRequest'
+      responses:
+        '200':
+          description: User logged in successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserLoginResponse'
+        '401':
+          description: Unauthorized
+  /users/profile:
+    get:
+      summary: Get user profile
+      tags:
+        - User
+      security:
+        - bearerAuth: [] # Placeholder for security scheme
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+  /users/{userID}:
+    get:
+      summary: Get user by ID
+      tags:
+        - User
+      security:
+        - bearerAuth: [] # Placeholder for security scheme
+      parameters:
+        - name: userID
+          in: path
+          required: true
+          description: ID of the user to retrieve
+          schema:
+            type: string # Assuming string, adjust if it's an integer or other type
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+        '404':
+          description: User not found
+  /admin/users:
+    get:
+      summary: Get all users (Admin only)
+      tags:
+        - Admin
+      security:
+        - bearerAuth: [] # Placeholder for security scheme, will require admin role
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (User is not an admin)
+  /boards:
+    post:
+      summary: Create a new board
+      tags:
+        - Board
+      security:
+        - bearerAuth: [] # Requires authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BoardRequest'
+      responses:
+        '201':
+          description: Board created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Board'
+        '400':
+          description: Invalid input
+        '401':
+          description: Unauthorized
+    get:
+      summary: Get all boards for the authenticated user
+      tags:
+        - Board
+      security:
+        - bearerAuth: [] # Requires authentication
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Board'
+        '401':
+          description: Unauthorized
+  /boards/{boardID}:
+    get:
+      summary: Get a board by its ID
+      tags:
+        - Board
+      security:
+        - bearerAuth: [] # Requires authentication
+      parameters:
+        - name: boardID
+          in: path
+          required: true
+          description: ID of the board to retrieve
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Board'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Board not found
+    put:
+      summary: Update a board by its ID
+      tags:
+        - Board
+      security:
+        - bearerAuth: [] # Requires authentication
+      parameters:
+        - name: boardID
+          in: path
+          required: true
+          description: ID of the board to update
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BoardRequest'
+      responses:
+        '200':
+          description: Board updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Board'
+        '400':
+          description: Invalid input
+        '401':
+          description: Unauthorized
+        '404':
+          description: Board not found
+    delete:
+      summary: Delete a board by its ID
+      tags:
+        - Board
+      security:
+        - bearerAuth: [] # Requires authentication
+      parameters:
+        - name: boardID
+          in: path
+          required: true
+          description: ID of the board to delete
+          schema:
+            type: string
+      responses:
+        '204': # No content for successful deletion
+          description: Board deleted successfully
+        '401':
+          description: Unauthorized
+        '404':
+          description: Board not found
+  /admin/boards:
+    get:
+      summary: Get all boards (Admin only)
+      tags:
+        - Admin
+      security:
+        - bearerAuth: [] # Requires authentication and admin role
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Board'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (User is not an admin)
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the user.
+          readOnly: true
+        name:
+          type: string
+          description: Name of the user.
+        email:
+          type: string
+          format: email
+          description: Email address of the user.
+        phone:
+          type: string
+          description: Phone number of the user.
+        role:
+          type: string
+          description: Role of the user (e.g., admin, user).
+          default: user
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp of when the user was created.
+          readOnly: true
+      required:
+        - name
+        - email
+        - password # Required for registration, not for response
+    UserRegisterRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the user.
+        email:
+          type: string
+          format: email
+          description: Email address of the user.
+        phone:
+          type: string
+          description: Phone number of the user.
+        password:
+          type: string
+          format: password
+          description: Password for the user.
+      required:
+        - name
+        - email
+        - password
+    UserLoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          description: Email address of the user.
+        password:
+          type: string
+          format: password
+          description: Password for the user.
+      required:
+        - email
+        - password
+    UserLoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT token for authenticated sessions.
+    Board:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the board.
+          readOnly: true
+        name:
+          type: string
+          description: Name of the board.
+        owner_id:
+          type: string
+          description: ID of the user who owns the board.
+          readOnly: true # Usually set by the backend based on authenticated user
+        owner_name:
+          type: string
+          description: Name of the user who owns the board.
+          readOnly: true # Usually set by the backend
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp of when the board was created.
+          readOnly: true
+      required:
+        - name
+    BoardRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the board.
+      required:
+        - name
+    TaskStatus:
+      type: string
+      enum:
+        - TODO
+        - IN_PROGRESS
+        - DONE
+      description: Status of a task.
+    Task:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the task.
+          readOnly: true
+        title:
+          type: string
+          description: Title of the task.
+        description:
+          type: string
+          description: Description of the task.
+        board_id:
+          type: string
+          description: ID of the board this task belongs to.
+        user_id: # This seems to be the creator of the task
+          type: string
+          description: ID of the user who created the task.
+          readOnly: true
+        assignee_id:
+          type: string
+          description: ID of the user assigned to this task.
+          nullable: true
+        status:
+          $ref: '#/components/schemas/TaskStatus'
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp of when the task was created.
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          description: Timestamp of when the task was last updated.
+          readOnly: true
+      required:
+        - title
+        - description
+        - board_id
+    TaskCreateRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Title of the task.
+        description:
+          type: string
+          description: Description of the task.
+        board_id:
+          type: string
+          description: ID of the board this task belongs to.
+      required:
+        - title
+        - description
+        - board_id
+    TaskUpdateRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          description: New title for the task.
+        description:
+          type: string
+          description: New description for the task.
+        assignee_id:
+          type: string
+          description: ID of the user to assign to this task.
+          nullable: true
+        status:
+          $ref: '#/components/schemas/TaskStatus'
+    TaskMoveRequest:
+      type: object
+      properties:
+        target_board_id: # Assuming the API expects a target board ID
+          type: string
+          description: ID of the board to move the task to.
+      required:
+        - target_board_id
+    TaskAssignRequest:
+      type: object
+      properties:
+        assignee_id:
+          type: string
+          description: ID of the user to assign to the task.
+          nullable: true # Allow unassigning by passing null or empty
+      required: # Or make assignee_id conditionally required if unassigning is a separate action
+        - assignee_id
+    TaskStatusUpdateRequest:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/TaskStatus'
+      required:
+        - status
+    Notification:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the notification.
+          readOnly: true
+        user_id:
+          type: string
+          description: ID of the user to whom the notification is addressed.
+        message:
+          type: string
+          description: Content of the notification message.
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp of when the notification was created.
+          readOnly: true
+      required:
+        - user_id
+        - message
+    NotificationRequest:
+      type: object
+      properties:
+        user_id:
+          type: string
+          description: ID of the user to send the notification to.
+        message:
+          type: string
+          description: Content of the notification message.
+      required:
+        - user_id
+        - message
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT # Optional, but good for documentation
+      description: |
+        JWT Authorization header using the Bearer scheme.
+        Example: "Authorization: Bearer {token}"
