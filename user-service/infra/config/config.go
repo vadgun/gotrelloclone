@@ -57,7 +57,7 @@ func InitMongo() {
 	logger.Log.Info("✅ Conectado a MongoDB desde user-service:", zap.String("db_Name", dbName))
 }
 
-func InitRedis() {
+func InitRedis() error {
 	// Obtener valores de entorno
 	redisAddr := os.Getenv("REDIS_ADDR") // "localhost:6379" o nombre del contenedor Docker
 	redisPass := os.Getenv("REDIS_PASS")
@@ -80,8 +80,12 @@ func InitRedis() {
 
 	_, err := RedisClient.Ping(ctx).Result()
 	if err != nil {
+		RedisClient = nil
 		logger.Log.Error("No se pudo conectar a Redis:", zap.String("error", err.Error()))
+		return err
 	}
 
 	logger.Log.Info("✅ Conectado a Redis en:", zap.String("redis_Addr", redisAddr))
+
+	return nil
 }

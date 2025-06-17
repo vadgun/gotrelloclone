@@ -92,6 +92,11 @@ func (r *UserRepository) GetUserByID(userID string) (*models.User, error) {
 	if errs != nil {
 		return nil, errors.New("id no valida")
 	}
+
+	if config.RedisClient == nil {
+		return nil, errors.New("Redis client not initialized")
+	}
+
 	// 1. Revisar cache
 	val, err := config.RedisClient.Get(ctx, userID).Result()
 	if err == nil {
@@ -131,7 +136,12 @@ func (r *UserRepository) GetAllUsers() ([]models.User, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer cursor.Close(ctx)
+
+	defer func() {
+		if err := cursor.Close(ctx); err != nil {
+			r.Logger.Info("❌ error al cerrar el cursor:", zap.Error(err))
+		}
+	}()
 
 	for cursor.Next(ctx) {
 		var user models.User

@@ -77,6 +77,11 @@ func (s *UserService) LoginUser(email, password string) (string, *models.User, e
 		return "", nil, err
 	}
 
+	//Verificar el usuario
+	if user == nil {
+		return "", nil, errors.New("El usuario no existe o esta vacio")
+	}
+
 	// Verificar la contraseña
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {

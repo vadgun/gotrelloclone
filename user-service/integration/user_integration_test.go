@@ -54,7 +54,12 @@ func TestIntegration_GetUserByEmail(t *testing.T) {
 	redisClient := redis.NewClient(&redis.Options{
 		Addr: "localhost:6379", // Cambia si estás usando Docker o localhost
 	})
-	defer redisClient.Close()
+
+	defer func() {
+		if err := redisClient.Close(); err != nil {
+			t.Logf("❌ error al cerrar el cliente de Redis: %v", err.Error())
+		}
+	}()
 	_, err := redisClient.Ping(context.TODO()).Result()
 	assert.NoError(t, err)
 
@@ -137,7 +142,12 @@ func TestKafkaProducerAndConsumer(t *testing.T) {
 		"auto.offset.reset": "earliest",
 	})
 	assert.NoError(t, err)
-	defer consumer.Close()
+
+	defer func() {
+		if err := consumer.Close(); err != nil {
+			t.Logf("❌ error al cerrar el consumidor de kafka: %v", err.Error())
+		}
+	}()
 
 	err = consumer.SubscribeTopics([]string{topic}, nil)
 	assert.NoError(t, err)

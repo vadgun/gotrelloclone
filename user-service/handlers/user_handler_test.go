@@ -51,6 +51,8 @@ func TestUserHandler_Register_Sucess(t *testing.T) {
 
 	// Ejecutar la solicitud
 	req, _ := http.NewRequest(http.MethodPost, "/register", bytes.NewBuffer(jsonValue))
+	assert.NotNil(t, req)
+
 	req.Header.Set("Content-Type", "application/json")
 	resp := httptest.NewRecorder()
 	router.ServeHTTP(resp, req)
@@ -84,6 +86,8 @@ func TestUserHandler_Register_InvalidInput(t *testing.T) {
 
 	// Ejecutar la solicitud
 	req, _ := http.NewRequest(http.MethodPost, "/register", bytes.NewBuffer(jsonValue))
+	assert.NotNil(t, req)
+
 	req.Header.Set("Content-Type", "application/json")
 	resp := httptest.NewRecorder()
 	router.ServeHTTP(resp, req)

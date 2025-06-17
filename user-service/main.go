@@ -74,5 +74,8 @@ func main() {
 
 	// Iniciar servidor en el puerto 8080
 	log.Info("🚀 user-service corriendo en http://user-service:8080")
-	router.Run(":8080")
+	err := router.Run(":8080")
+	if err != nil {
+		return
+	}
 }
